@@ -1,0 +1,517 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn-svelte/tailwind.css';
+@plugin '@tailwindcss/typography';
+
+/* Dark mode follows <html data-theme>: "dark" always, "system" when the OS prefers dark. */
+@custom-variant dark {
+	&:where([data-theme='dark'], [data-theme='dark'] *) {
+		@slot;
+	}
+	@media (prefers-color-scheme: dark) {
+		&:where([data-theme='system'], [data-theme='system'] *) {
+			@slot;
+		}
+	}
+}
+
+/* ---------------------------------------------------------------------------
+   Design tokens — see .claude/design.md.
+   White canvas, achromatic UI, ONE saturated accent (violet). Product imagery
+   supplies the colour; the interface stays black, white and warm-neutral grey.
+   shadcn-svelte token names are the source of truth; the marketplace aliases
+   (ink, surface, line, brand…) map onto them so both vocabularies stay in sync.
+   --------------------------------------------------------------------------- */
+:root {
+	--radius: 1.25rem;
+
+	/* Surfaces: level 0 canvas mist, level 1 pure white. */
+	--background: #ffffff;
+	--foreground: #000000;
+	--card: #ffffff;
+	--card-foreground: #000000;
+	--popover: #ffffff;
+	--popover-foreground: #000000;
+
+	/* The single accent: wordmark, search submit, primary action. */
+	--primary: #5433eb;
+	--primary-active: #4424d6;
+	--primary-foreground: #ffffff;
+	--violet-wash: #c0b5f3;
+
+	--secondary: #f2f4f5;
+	--secondary-foreground: #000000;
+	--muted: #f2f4f5;
+	/* Darkened from Muted Gray (#787574) so body copy keeps AA on the mist canvas. */
+	--muted-foreground: #63605f;
+	--accent: #f2f4f5;
+	--accent-foreground: #000000;
+	--destructive: #d1281b;
+	--border: #ebebeb;
+	--input: rgb(0 0 0 / 0.12);
+	--ring: #5433eb;
+
+	--surface-2: #f2f4f5;
+	--surface-3: #e8eaeb;
+	--ink-3: #787574;
+	--line-strong: #cccccc;
+	--brand-soft: #efecfd;
+	/* Card edge: invisible on light (shadow does the work), a hairline on dark. */
+	--edge: rgb(0 0 0 / 0.04);
+	/* Ratings are monochrome ink — no second accent. */
+	--rating: #000000;
+
+	/* Functional status tones (orders, payouts). Kept muted, used only in badges. */
+	--success: #17714a;
+	--success-soft: #e7f4ec;
+	--warning: #9a5300;
+	--warning-soft: #fcf1e1;
+	--info: #2f5bc4;
+	--info-soft: #ebf0fb;
+	--danger-soft: #fdecea;
+
+	--chart-1: #5433eb;
+	--chart-2: #332f2d;
+	--chart-3: #acb0aa;
+	/* Categorical slots 2-4 (slot 1 is --chart-1), validated as an adjacent set against the card
+	   surface: CVD ΔE >= 9.1 light / 8.4 dark. 5 and 6 are under 3:1 on white, so every chart that
+	   uses them also shows the values as text. */
+	--chart-4: #eb6834;
+	--chart-5: #1baf7a;
+	--chart-6: #eda100;
+
+	/* Sidebar rail: white surface, mist pill on the active item. */
+	--sidebar: var(--card);
+	--sidebar-foreground: var(--foreground);
+	--sidebar-primary: var(--primary);
+	--sidebar-primary-foreground: var(--primary-foreground);
+	--sidebar-accent: var(--muted);
+	--sidebar-accent-foreground: var(--foreground);
+	--sidebar-border: var(--border);
+	--sidebar-ring: var(--ring);
+
+	/* Elevation — verbatim from the design reference. */
+	--shadow-pill: 0 2px 8px 0 rgb(0 0 0 / 0.06);
+	--shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+	--shadow-float: 0 4px 24px 0 rgb(0 0 0 / 0.12);
+	--shadow-lift: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 12px 32px -4px rgb(0 0 0 / 0.16);
+	--shadow-brand: 0 4px 24px 0 rgb(69 36 219 / 0.34);
+	color-scheme: light;
+}
+
+/* Dark theme — derived (the reference is light-only). Same single-accent logic. */
+@media (prefers-color-scheme: dark) {
+	:root[data-theme='system'] {
+		--background: #0c0c0e;
+		--foreground: #f5f5f6;
+		--card: #17171a;
+		--card-foreground: #f5f5f6;
+		--popover: #1c1c20;
+		--popover-foreground: #f5f5f6;
+		--primary: #7a63ff;
+		--primary-active: #6a51fa;
+		--primary-foreground: #ffffff;
+		--violet-wash: #3a2f80;
+		--secondary: #222226;
+		--secondary-foreground: #f5f5f6;
+		--muted: #1f1f23;
+		--muted-foreground: #a9a6a5;
+		--accent: #26262b;
+		--accent-foreground: #f5f5f6;
+		--destructive: #ff6a5c;
+		--border: #2a2a2f;
+		--input: rgb(255 255 255 / 0.14);
+		--ring: #8b78ff;
+		--surface-2: #18181c;
+		--surface-3: #222226;
+		--ink-3: #8f8c8b;
+		--line-strong: #3d3d43;
+		--brand-soft: #221d40;
+		--edge: rgb(255 255 255 / 0.08);
+		--rating: #f5f5f6;
+		--success: #5fd39a;
+		--success-soft: #13291e;
+		--warning: #f2b45c;
+		--warning-soft: #2c2111;
+		--info: #8fb0ff;
+		--info-soft: #18213a;
+		--danger-soft: #3a1714;
+		--chart-1: #8b78ff;
+		--chart-2: #d9d6d4;
+		--chart-3: #6d716b;
+		--chart-4: #d95926;
+		--chart-5: #199e70;
+		--chart-6: #c98500;
+		--shadow-pill: 0 2px 8px 0 rgb(0 0 0 / 0.4);
+		--shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+		--shadow-float: 0 4px 24px 0 rgb(0 0 0 / 0.55);
+		--shadow-lift: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 12px 32px -4px rgb(0 0 0 / 0.6);
+		--shadow-brand: 0 4px 24px 0 rgb(122 99 255 / 0.35);
+		color-scheme: dark;
+	}
+}
+:root[data-theme='dark'] {
+	--background: #0c0c0e;
+	--foreground: #f5f5f6;
+	--card: #17171a;
+	--card-foreground: #f5f5f6;
+	--popover: #1c1c20;
+	--popover-foreground: #f5f5f6;
+	--primary: #7a63ff;
+	--primary-active: #6a51fa;
+	--primary-foreground: #ffffff;
+	--violet-wash: #3a2f80;
+	--secondary: #222226;
+	--secondary-foreground: #f5f5f6;
+	--muted: #1f1f23;
+	--muted-foreground: #a9a6a5;
+	--accent: #26262b;
+	--accent-foreground: #f5f5f6;
+	--destructive: #ff6a5c;
+	--border: #2a2a2f;
+	--input: rgb(255 255 255 / 0.14);
+	--ring: #8b78ff;
+	--surface-2: #18181c;
+	--surface-3: #222226;
+	--ink-3: #8f8c8b;
+	--line-strong: #3d3d43;
+	--brand-soft: #221d40;
+	--edge: rgb(255 255 255 / 0.08);
+	--rating: #f5f5f6;
+	--success: #5fd39a;
+	--success-soft: #13291e;
+	--warning: #f2b45c;
+	--warning-soft: #2c2111;
+	--info: #8fb0ff;
+	--info-soft: #18213a;
+	--danger-soft: #3a1714;
+	--chart-1: #8b78ff;
+	--chart-2: #d9d6d4;
+	--chart-3: #6d716b;
+	--chart-4: #d95926;
+	--chart-5: #199e70;
+	--chart-6: #c98500;
+	--shadow-pill: 0 2px 8px 0 rgb(0 0 0 / 0.4);
+	--shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+	--shadow-float: 0 4px 24px 0 rgb(0 0 0 / 0.55);
+	--shadow-lift: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 12px 32px -4px rgb(0 0 0 / 0.6);
+	--shadow-brand: 0 4px 24px 0 rgb(122 99 255 / 0.35);
+	color-scheme: dark;
+}
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-active: var(--primary-active);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
+	--color-chart-6: var(--chart-6);
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
+
+	/* Marketplace aliases */
+	--color-bg: var(--background);
+	--color-surface: var(--card);
+	--color-surface-2: var(--surface-2);
+	--color-surface-3: var(--surface-3);
+	--color-ink: var(--foreground);
+	--color-ink-2: var(--muted-foreground);
+	--color-ink-3: var(--ink-3);
+	--color-line: var(--border);
+	--color-line-strong: var(--line-strong);
+	--color-edge: var(--edge);
+	--color-brand: var(--primary);
+	--color-brand-ink: var(--primary-foreground);
+	--color-brand-soft: var(--brand-soft);
+	--color-violet-wash: var(--violet-wash);
+	--color-rating: var(--rating);
+	--color-danger: var(--destructive);
+	--color-danger-soft: var(--danger-soft);
+	--color-success: var(--success);
+	--color-success-soft: var(--success-soft);
+	--color-warning: var(--warning);
+	--color-warning-soft: var(--warning-soft);
+	--color-info: var(--info);
+	--color-info-soft: var(--info-soft);
+	/* Image scrims stay dark in both themes so overlaid copy keeps its contrast. */
+	--color-scrim: #000000;
+	--color-on-scrim: #ffffff;
+
+	/* One family at every size (GT Standard → Inter substitute). Arabic falls through to Plex. */
+	--font-sans:
+		'Inter Variable', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, -apple-system,
+		BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	--font-display: var(--font-sans);
+	--font-heading: var(--font-sans);
+
+	/* Radius scale pinned to the reference: 9999 pills, 28px cards, 20px pills/panels. */
+	--radius-sm: 8px;
+	--radius-md: 14px; /* menu items, tooltips, skeletons */
+	--radius-lg: 20px; /* popovers, menus, alerts, textareas */
+	--radius-xl: 28px; /* dialogs */
+	--radius-2xl: 28px; /* cards */
+	--radius-3xl: 32px;
+	--radius-4xl: 9999px; /* badges */
+
+	/* Elevation ladder — Tailwind's scale points at the reference shadows. */
+	--shadow-xs: 0 0 #0000;
+	--shadow-sm: var(--shadow-pill);
+	--shadow-md: var(--shadow-soft);
+	--shadow-lg: var(--shadow-float);
+	--shadow-xl: var(--shadow-lift);
+	--shadow-soft: var(--shadow-soft);
+	--shadow-lift: var(--shadow-lift);
+	--shadow-pill: var(--shadow-pill);
+	--shadow-float: var(--shadow-float);
+	--shadow-brand: var(--shadow-brand);
+}
+
+@layer base {
+	* {
+		@apply border-border outline-ring/50;
+	}
+	html {
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
+	body {
+		@apply bg-background text-foreground;
+		font-family: var(--font-sans);
+		font-optical-sizing: auto;
+		/* Shape text with tracking, not weight. */
+		letter-spacing: -0.011em;
+		min-height: 100dvh;
+	}
+	h1,
+	h2,
+	h3 {
+		text-wrap: balance;
+		letter-spacing: -0.025em;
+	}
+	/* Arabic is cursive: negative tracking breaks joins. */
+	:root[lang='ar'] body,
+	:root[lang='ar'] :is(h1, h2, h3, .font-display) {
+		letter-spacing: 0;
+	}
+	::selection {
+		background: color-mix(in oklab, var(--primary) 22%, transparent);
+	}
+}
+
+@layer components {
+	/* Display headings: semibold, compressed — big text pulls tight. */
+	.font-display {
+		font-weight: 600;
+		letter-spacing: -0.04em;
+	}
+	/* Directional icons (chevrons, arrows) mirror in RTL. */
+	[dir='rtl'] .cn-rtl-flip,
+	[dir='rtl'] .rtl-flip {
+		transform: scaleX(-1);
+	}
+	.cn-toast {
+		font-family: var(--font-sans);
+	}
+	/* Horizontal product rails: snap, no scrollbar chrome. */
+	.rail {
+		display: grid;
+		grid-auto-flow: column;
+		gap: 0.75rem;
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scroll-snap-type: x mandatory;
+		scrollbar-width: none;
+	}
+	.rail::-webkit-scrollbar {
+		display: none;
+	}
+	.rail > * {
+		scroll-snap-align: start;
+	}
+}
+
+/* Type scale — utilities (not --text-* keys) so cn() never mistakes them for colours. */
+@utility type-display {
+	font-size: clamp(2.5rem, 4.2vw + 1rem, 4.75rem);
+	font-weight: 600;
+	line-height: 1.02;
+	letter-spacing: -0.045em;
+}
+@utility type-headline {
+	font-size: clamp(1.75rem, 1.6vw + 1rem, 2.5rem);
+	font-weight: 600;
+	line-height: 1.08;
+	letter-spacing: -0.04em;
+}
+@utility type-title {
+	font-size: 1.25rem;
+	font-weight: 600;
+	line-height: 1.2;
+	letter-spacing: -0.035em;
+}
+@utility type-label {
+	font-size: 0.75rem;
+	font-weight: 500;
+	line-height: 1.33;
+	letter-spacing: -0.017em;
+}
+@utility type-caption {
+	font-size: 0.6875rem;
+	font-weight: 500;
+	line-height: 1.33;
+	letter-spacing: -0.01em;
+}
+
+@utility tabular {
+	font-variant-numeric: tabular-nums;
+}
+
+/* 1200px content column (reference max-width) plus gutters. */
+@utility container-page {
+	width: 100%;
+	max-width: calc(1200px + 4rem);
+	margin-inline: auto;
+	padding-inline: 1rem;
+	@media (width >= 40rem) {
+		padding-inline: 1.5rem;
+	}
+	@media (width >= 64rem) {
+		padding-inline: 2rem;
+	}
+}
+
+/* ---------------------------------------------------------------------------
+   Leaflet maps (LocationMap.svelte): pill controls, violet pin, themed tiles.
+   --------------------------------------------------------------------------- */
+.location-map.leaflet-container {
+	font-family: var(--font-sans);
+	background: var(--surface-2);
+	outline-offset: 2px;
+}
+.location-map.leaflet-container:focus-visible {
+	outline: 2px solid var(--ring);
+}
+.location-map .leaflet-bar {
+	border: 0;
+	border-radius: 9999px;
+	overflow: hidden;
+	box-shadow: var(--shadow-float);
+}
+.location-map .leaflet-bar a {
+	width: 36px;
+	height: 36px;
+	line-height: 34px;
+	border: 0;
+	background: var(--card);
+	color: var(--foreground);
+	font-weight: 400;
+}
+.location-map .leaflet-bar a:hover {
+	background: var(--muted);
+}
+.location-map .leaflet-bar a + a {
+	border-top: 1px solid var(--border);
+}
+.location-map .leaflet-control-attribution {
+	border-radius: 9999px 0 0 0;
+	padding-inline: 8px;
+	background: color-mix(in oklab, var(--card) 85%, transparent);
+	color: var(--muted-foreground);
+	font-size: 10px;
+}
+.location-map .leaflet-control-attribution a {
+	color: var(--foreground);
+}
+/* The pin: the one place the accent marks "where". */
+.map-pin {
+	background: none;
+	border: 0;
+}
+.map-pin span {
+	position: absolute;
+	inset: 0 0 8px;
+	border-radius: 50% 50% 50% 0;
+	transform: rotate(-45deg);
+	background: var(--primary);
+	box-shadow: var(--shadow-brand);
+	border: 3px solid #ffffff;
+}
+.map-pin span::after {
+	content: '';
+	position: absolute;
+	inset: 50%;
+	width: 8px;
+	height: 8px;
+	margin: -4px;
+	border-radius: 9999px;
+	background: #ffffff;
+}
+.leaflet-marker-draggable.map-pin {
+	cursor: grab;
+}
+.leaflet-tooltip.map-tooltip {
+	border: 0;
+	border-radius: 9999px;
+	padding: 4px 10px;
+	background: var(--foreground);
+	color: var(--background);
+	font: 500 12px/1.33 var(--font-sans);
+	box-shadow: var(--shadow-float);
+}
+.leaflet-tooltip.map-tooltip::before {
+	display: none;
+}
+/* Dark themes: invert the light basemap into a quiet charcoal one. */
+:root[data-theme='dark'] .location-map .leaflet-tile-pane {
+	filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.6);
+}
+@media (prefers-color-scheme: dark) {
+	:root[data-theme='system'] .location-map .leaflet-tile-pane {
+		filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.6);
+	}
+}
+
+/* Hero constellation: a slow, barely-there hover. Disabled by reduced motion below. */
+@keyframes drift {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-8px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+	}
+}

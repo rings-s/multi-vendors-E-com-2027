@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime data
+apps/backend/var/
+apps/backend/tests/.uploads/
+
+# Frontend
+node_modules/
+.svelte-kit/
+build/
+dist/
+
+# Environment (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
