@@ -27,3 +27,7 @@ dist/
 .idea/
 .vscode/
 .DS_Store
+
+# Impeccable design tooling (mocks, review screenshots, cache) and product brief
+.impeccable/
+/PRODUCT.md
