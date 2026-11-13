@@ -27,7 +27,7 @@
 		bind:this={ref}
 		data-slot="native-select"
 		data-size={size}
-		class="h-10 w-full min-w-0 appearance-none rounded-full border border-input bg-card py-1 ps-4 pe-9 text-sm transition-colors outline-none select-none selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/15 disabled:pointer-events-none disabled:cursor-not-allowed aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=sm]:h-8 data-[size=sm]:py-0.5 data-[size=sm]:ps-3 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
+		class="h-10 w-full min-w-0 appearance-none rounded-lg border border-input bg-card py-1 ps-3.5 pe-9 text-sm transition-colors outline-none select-none selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/15 disabled:pointer-events-none disabled:cursor-not-allowed aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=sm]:h-8 data-[size=sm]:py-0.5 data-[size=sm]:ps-3 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
 		{...restProps}
 	>
 		{@render children?.()}

@@ -2,7 +2,7 @@
 	import { type VariantProps, tv } from 'tailwind-variants';
 
 	export const badgeVariants = tv({
-		base: 'h-6 gap-1 rounded-4xl border border-transparent px-2.5 py-0.5 text-xs font-medium tracking-[-0.017em] transition-all has-data-[icon=inline-end]:pe-1.5 has-data-[icon=inline-start]:ps-1.5 [&>svg]:size-3! group/badge inline-flex w-fit shrink-0 items-center justify-center overflow-hidden whitespace-nowrap focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none',
+		base: 'h-6 gap-1 rounded-4xl border border-transparent px-2.5 py-0.5 text-xs font-medium transition-all has-data-[icon=inline-end]:pe-1.5 has-data-[icon=inline-start]:ps-1.5 [&>svg]:size-3! group/badge inline-flex w-fit shrink-0 items-center justify-center overflow-hidden whitespace-nowrap focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none',
 		variants: {
 			variant: {
 				default: 'bg-primary text-primary-foreground [a]:hover:bg-primary/80',
@@ -18,7 +18,7 @@
 				warning: 'bg-warning-soft text-warning [a]:hover:bg-warning-soft/80',
 				info: 'bg-info-soft text-info [a]:hover:bg-info-soft/80',
 				brand: 'bg-brand-soft text-primary [a]:hover:bg-brand-soft/80',
-				sale: 'bg-foreground text-background [a]:hover:bg-foreground/85'
+				sale: 'bg-sale-soft text-sale [a]:hover:bg-sale-soft/80'
 			}
 		},
 		defaultVariants: {

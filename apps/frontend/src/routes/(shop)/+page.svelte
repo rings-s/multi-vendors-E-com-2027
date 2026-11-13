@@ -8,10 +8,8 @@
 	import EmptyState from '#lib/components/app/EmptyState.svelte';
 	import Picture from '#lib/components/app/Picture.svelte';
 	import ProductCard from '#lib/components/app/ProductCard.svelte';
-	import SearchPill from '#lib/components/app/SearchPill.svelte';
 	import ServiceCard from '#lib/components/app/ServiceCard.svelte';
 	import StoreCard from '#lib/components/app/StoreCard.svelte';
-	import * as Card from '#lib/components/ui/card/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { fmt, m, pick } from '#lib/i18n/state.svelte.js';
 	import { cn } from '#lib/utils.js';
@@ -32,46 +30,11 @@
 		{ icon: BadgeCheckIcon, title: m().home.promise3Title, body: m().home.promise3Body }
 	]);
 	const topCategories = $derived(home.categories.filter((c) => !c.parent_id));
-
-	/*
-	 * Hero constellation: up to five featured products float above the headline,
-	 * largest in the centre, smaller and tilted toward the edges, slightly overlapping.
-	 */
-	const slots = [
-		{
-			size: 'w-28 sm:w-36',
-			offset: 'translate-y-10',
-			tilt: '-rotate-6',
-			show: 'hidden sm:block',
-			delay: '0s'
-		},
-		{ size: 'w-32 sm:w-44', offset: 'translate-y-2', tilt: '-rotate-2', show: '', delay: '-2.5s' },
-		{
-			size: 'w-36 sm:w-52',
-			offset: '-translate-y-2',
-			tilt: 'rotate-0',
-			show: '',
-			delay: '-1s',
-			z: 'z-10'
-		},
-		{ size: 'w-32 sm:w-44', offset: 'translate-y-4', tilt: 'rotate-3', show: '', delay: '-3.5s' },
-		{
-			size: 'w-28 sm:w-36',
-			offset: 'translate-y-12',
-			tilt: 'rotate-6',
-			show: 'hidden sm:block',
-			delay: '-5s'
-		}
-	];
-	// Product i lands in slot centreOut[i], so the first (most featured) one takes the centre.
-	const centreOut = [2, 1, 3, 0, 4];
-	const constellation = $derived(
-		home.featured_products
-			.filter((p) => p.images.length)
-			.slice(0, 5)
-			.map((product, i) => ({ product, at: centreOut[i] }))
-			.sort((a, b) => a.at - b.at)
-			.map(({ product, at }) => ({ product, slot: slots[at] }))
+	/** The banner shows what is actually for sale: up to three featured products. */
+	const spotlight = $derived(home.featured_products.slice(0, 3));
+	/** Recently opened stores that are not already listed as featured. */
+	const newStores = $derived(
+		home.recent_stores.filter((r) => !home.featured_stores.some((f) => f.id === r.id)).slice(0, 3)
 	);
 </script>
 
@@ -79,73 +42,102 @@
 	<title>{m().brand.name} · {m().brand.tagline}</title>
 </svelte:head>
 
-<!-- Section header: 20px semibold with a chevron affordance; the whole title is the link. -->
 {#snippet sectionHead(title: string, href?: string, id?: string)}
-	<div class="mb-6 flex items-center justify-between gap-4">
+	<div class="mb-5 flex items-end justify-between gap-4">
+		<h2 {id} class="type-title text-ink">{title}</h2>
 		{#if href}
-			<h2 {id} class="type-title text-ink">
-				<a
-					{href}
-					class="group/head inline-flex items-center gap-1 rounded-full focus-visible:ring-4 focus-visible:ring-ring/20 focus-visible:outline-none"
-				>
-					{title}
-					<ChevronRightIcon
-						class="rtl-flip size-5 transition-transform duration-200 group-hover/head:translate-x-0.5 rtl:group-hover/head:-translate-x-0.5"
-						aria-hidden="true"
-					/>
-				</a>
-			</h2>
-			<Button
+			<a
 				{href}
-				variant="outline"
-				size="sm"
-				class="hidden sm:inline-flex"
-				tabindex={-1}
-				aria-hidden="true"
+				class="group/all inline-flex shrink-0 items-center gap-0.5 rounded-sm text-sm font-medium text-primary outline-none hover:underline hover:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring/60"
 			>
-				{m().common.viewAll}
-			</Button>
-		{:else}
-			<h2 {id} class="type-title text-ink">{title}</h2>
+				{m().common.viewAll}<span class="sr-only">: {title}</span>
+				<ChevronRightIcon
+					class="rtl-flip size-4 transition-transform duration-200 group-hover/all:translate-x-0.5 rtl:group-hover/all:-translate-x-0.5"
+					aria-hidden="true"
+				/>
+			</a>
 		{/if}
 	</div>
 {/snippet}
 
-<!-- ─── Hero ─────────────────────────────────────────────────────────────── -->
-<section class="relative overflow-hidden">
-	<div class="container-page flex flex-col items-center pt-32 pb-4 text-center sm:pb-6">
-		{#if constellation.length >= 3}
+<!-- ─── Banner: the offer and the way in, beside products that are actually on sale ─── -->
+<section class="container-page pt-5 sm:pt-6">
+	<div
+		class={cn(
+			'grid overflow-hidden rounded-2xl bg-hero text-hero-foreground',
+			spotlight.length && 'lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]'
+		)}
+	>
+		<div class="flex flex-col justify-center gap-5 p-6 sm:p-10 lg:p-14">
+			<h1 class="rise max-w-[16ch] type-display">
+				<bdi>{pick(s, 'hero_title')}</bdi>
+			</h1>
+			<p class="rise max-w-md text-base text-pretty text-hero-muted sm:text-lg" style="--i: 1">
+				<bdi>{pick(s, 'hero_subtitle') || m().brand.tagline}</bdi>
+			</p>
+			<div class="rise mt-2 flex flex-wrap items-center gap-3" style="--i: 2">
+				<Button
+					href="/stores"
+					size="lg"
+					class="bg-hero-foreground text-hero shadow-none hover:bg-hero-foreground/90 active:bg-hero-foreground/90"
+				>
+					{m().home.heroCta}<ArrowRightIcon class="rtl-flip" data-icon="inline-end" />
+				</Button>
+				<Button
+					href="/sell"
+					size="lg"
+					variant="ghost"
+					class="text-hero-foreground hover:bg-hero-foreground/10"
+				>
+					<StoreIcon data-icon="inline-start" />{m().home.heroSecondary}
+				</Button>
+			</div>
+		</div>
+
+		{#if spotlight.length}
 			<ul
-				class="mb-10 flex items-start justify-center sm:mb-14"
+				class={cn(
+					'grid content-center gap-3 p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:ps-0',
+					spotlight.length === 1
+						? 'grid-cols-1'
+						: spotlight.length === 2
+							? 'grid-cols-2'
+							: 'grid-cols-3 lg:grid-cols-[1.35fr_1fr] lg:grid-rows-2'
+				)}
 				aria-label={m().home.featuredProducts}
 			>
-				{#each constellation as { slot, product } (product.id)}
-					<li class={cn('-mx-2 shrink-0 sm:-mx-3', slot.show, slot.z)}>
+				{#each spotlight as product, i (product.id)}
+					<li
+						class={cn('rise', spotlight.length === 3 && i === 0 && 'lg:row-span-2')}
+						style="--i: {i + 2}"
+					>
 						<a
 							href="/products/{product.id}"
-							class={cn(
-								'group block rounded-[24px] bg-card p-1.5 text-start shadow-soft ring-1 ring-edge transition-shadow duration-300 hover:shadow-lift focus-visible:ring-4 focus-visible:ring-ring/25 focus-visible:outline-none',
-								'animate-[drift_9s_ease-in-out_infinite]',
-								slot.size,
-								slot.offset,
-								slot.tilt
-							)}
-							style="animation-delay: {slot.delay}"
+							class="group relative block h-full min-h-32 overflow-hidden rounded-xl bg-surface-2 text-ink outline-none focus-visible:ring-2 focus-visible:ring-hero-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-hero sm:min-h-44"
 						>
-							<div class="aspect-square overflow-hidden rounded-[18px] bg-surface-2">
+							<div
+								class={cn(
+									'size-full',
+									spotlight.length === 3 && i === 0
+										? 'aspect-square lg:aspect-auto'
+										: 'aspect-square'
+								)}
+							>
 								<Picture
 									src={product.images[0]?.url}
 									alt={product.images[0]?.alt || product.title}
 									fallback={product.title}
 									loading="eager"
-									class="transition-transform duration-700 group-hover:scale-[1.05]"
+									class="transition-transform duration-500 ease-(--ease-out) group-hover:scale-[1.04]"
 								/>
 							</div>
-							<div class="flex flex-col gap-0.5 px-1.5 pt-2 pb-1">
-								<p class="truncate text-[0.8125rem] font-semibold tracking-[-0.02em] text-ink">
-									<bdi>{product.store.name}</bdi>
+							<div
+								class="absolute inset-x-1.5 bottom-1.5 flex items-center justify-center gap-2 rounded-lg bg-card/95 px-2 py-1.5 shadow-soft sm:inset-x-2 sm:bottom-2 sm:justify-between sm:px-3 sm:py-2"
+							>
+								<p class="hidden min-w-0 truncate text-sm font-medium sm:block" dir="auto">
+									{product.title}
 								</p>
-								<p class="truncate type-caption text-ink-3 tabular">
+								<p class="shrink-0 text-xs font-semibold tabular sm:text-sm">
 									{fmt.money(product.discounted_price ?? product.price)}
 								</p>
 							</div>
@@ -154,53 +146,43 @@
 				{/each}
 			</ul>
 		{/if}
-
-		<h1 class="max-w-4xl font-display type-display text-ink">
-			<bdi>{pick(s, 'hero_title')}</bdi>
-		</h1>
-		<p class="mt-5 max-w-xl text-base text-pretty text-ink-2 sm:text-lg">
-			<bdi>{pick(s, 'hero_subtitle') || m().brand.tagline}</bdi>
-		</p>
-
-		<SearchPill size="lg" class="mt-8 max-w-xl" />
-
-		{#if topCategories.length}
-			<nav aria-label={m().home.categories} class="mt-6 w-full max-w-3xl">
-				<!-- One swipeable row on phones; a centred wrapping row from sm up. -->
-				<ul
-					class="rail -mx-4 scroll-px-4 justify-start gap-2 px-4 py-1 sm:mx-0 sm:flex sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0"
-				>
-					{#each topCategories as c (c.id)}
-						<li>
-							<Button href="/products?category={c.slug}" variant="outline">
-								<bdi>{pick(c, 'name')}</bdi>
-							</Button>
-						</li>
-					{/each}
-				</ul>
-			</nav>
-		{/if}
-
-		<div class="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-			<Button href="/stores" variant="link" class="px-0">
-				{m().home.heroCta}<ArrowRightIcon class="rtl-flip" data-icon="inline-end" />
-			</Button>
-			<Button href="/sell" variant="link" class="px-0 text-ink-2">
-				<StoreIcon data-icon="inline-start" />{m().home.heroSecondary}
-			</Button>
-		</div>
 	</div>
 </section>
 
-<!-- ─── Promotions: the image IS the card, display type set straight on it ── -->
+<!-- ─── Categories ─────────────────────────────────────────────────────────── -->
+{#if topCategories.length}
+	<section class="container-page mt-10" aria-labelledby="home-categories">
+		{@render sectionHead(m().home.categories, undefined, 'home-categories')}
+		<ul
+			class="rail -mx-4 scroll-px-4 auto-cols-[minmax(9.5rem,1fr)] px-4 sm:mx-0 sm:auto-cols-auto sm:grid-flow-row sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-5"
+		>
+			{#each topCategories as c (c.id)}
+				<li>
+					<a
+						href="/{c.kind === 'SERVICE' ? 'services' : 'products'}?category={c.slug}"
+						class="group flex h-full items-center justify-between gap-3 rounded-xl bg-card px-4 py-3.5 ring-1 ring-edge transition-[background-color,box-shadow] duration-150 outline-none hover:bg-brand-soft hover:ring-primary/40 focus-visible:ring-2 focus-visible:ring-ring"
+					>
+						<span class="text-[0.9375rem] font-medium text-ink"><bdi>{pick(c, 'name')}</bdi></span>
+						<ArrowRightIcon
+							class="rtl-flip size-4 shrink-0 text-ink-3 transition-[color,transform] duration-200 group-hover:translate-x-0.5 group-hover:text-primary rtl:group-hover:-translate-x-0.5"
+							aria-hidden="true"
+						/>
+					</a>
+				</li>
+			{/each}
+		</ul>
+	</section>
+{/if}
+
+<!-- ─── Promotions: administrator-set banners ──────────────────────────────── -->
 {#if s.promotions?.length}
-	<section class="container-page grid gap-3 md:grid-cols-5">
+	<section class="container-page mt-10 grid gap-3 md:grid-cols-5">
 		{#each s.promotions as promo, i (i)}
 			<a
 				href={promo.link || '/products'}
 				class={cn(
-					'group relative flex min-h-56 flex-col overflow-hidden rounded-2xl p-7 focus-visible:ring-4 focus-visible:ring-ring/25 focus-visible:outline-none sm:min-h-72',
-					promo.image_url ? 'bg-scrim text-on-scrim' : 'bg-surface-2 text-ink',
+					'group relative flex min-h-52 flex-col overflow-hidden rounded-2xl p-6 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:min-h-64 sm:p-8',
+					promo.image_url ? 'bg-scrim text-on-scrim' : 'bg-brand-soft text-ink',
 					s.promotions.length > 1 && i % 2 === 0 ? 'md:col-span-3' : 'md:col-span-2',
 					s.promotions.length === 1 && 'md:col-span-5'
 				)}
@@ -209,20 +191,20 @@
 					<img
 						src={promo.image_url}
 						alt=""
-						class="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+						class="absolute inset-0 size-full object-cover transition-transform duration-700 ease-(--ease-out) group-hover:scale-[1.03]"
 					/>
 					<div
-						class="absolute inset-0 bg-gradient-to-b from-scrim/55 via-scrim/10 to-transparent"
+						class="absolute inset-0 bg-linear-to-b from-scrim/60 via-scrim/15 to-transparent"
 					></div>
 				{/if}
 				<div class="relative flex max-w-md flex-col gap-2">
-					<p class="font-display type-headline"><bdi>{pick(promo, 'title')}</bdi></p>
+					<p class="type-headline"><bdi>{pick(promo, 'title')}</bdi></p>
 					{#if pick(promo, 'subtitle')}
-						<p class="text-sm opacity-85"><bdi>{pick(promo, 'subtitle')}</bdi></p>
+						<p class="text-sm opacity-90"><bdi>{pick(promo, 'subtitle')}</bdi></p>
 					{/if}
 				</div>
 				<span
-					class="relative mt-auto inline-flex size-10 items-center justify-center self-end rounded-full bg-card text-ink shadow-float transition-transform duration-300 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
+					class="relative mt-auto inline-flex size-10 items-center justify-center self-end rounded-full bg-card text-ink shadow-soft transition-transform duration-200 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
 					aria-hidden="true"
 				>
 					<ArrowRightIcon class="rtl-flip size-4" />
@@ -233,17 +215,28 @@
 {/if}
 
 {#if isEmpty}
-	<div class="container-page mt-16">
+	<div class="container-page mt-14">
 		<EmptyState icon={StoreIcon} title={m().home.emptyTitle} description={m().home.emptyBody}>
 			<Button href="/sell">{m().home.heroSecondary}</Button>
 		</EmptyState>
 	</div>
 {/if}
 
+{#if home.featured_products.length}
+	<section class="container-page mt-14" aria-labelledby="featured-products">
+		{@render sectionHead(m().home.featuredProducts, '/products', 'featured-products')}
+		<div class="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
+			{#each home.featured_products.slice(0, 10) as product (product.id)}
+				<ProductCard {product} />
+			{/each}
+		</div>
+	</section>
+{/if}
+
 {#if home.featured_stores.length}
-	<section class="container-page mt-20" aria-labelledby="featured-stores">
+	<section class="container-page mt-16" aria-labelledby="featured-stores">
 		{@render sectionHead(m().home.featuredStores, '/stores', 'featured-stores')}
-		<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each home.featured_stores.slice(0, 6) as store (store.id)}
 				<StoreCard {store} />
 			{/each}
@@ -251,38 +244,32 @@
 	</section>
 {/if}
 
-{#if home.featured_products.length}
-	<section class="container-page mt-20" aria-labelledby="featured-products">
-		{@render sectionHead(m().home.featuredProducts, '/products', 'featured-products')}
-		<div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-			{#each home.featured_products.slice(0, 8) as product (product.id)}
-				<ProductCard {product} />
-			{/each}
-		</div>
-	</section>
-{/if}
-
-<!-- ─── Trust band: neutral wash, mono icons — no colour competes with product ── -->
-<section class="container-page mt-20">
-	<div class="grid gap-10 rounded-2xl bg-surface-2 px-6 py-12 sm:px-10 md:grid-cols-3 md:gap-8">
-		{#each promises as p (p.title)}
-			<div class="flex flex-col gap-3">
-				<span
-					class="inline-flex size-11 items-center justify-center rounded-full bg-card text-ink shadow-pill"
-				>
-					<p.icon class="size-5" aria-hidden="true" />
-				</span>
-				<h3 class="type-title text-ink">{p.title}</h3>
-				<p class="text-sm leading-relaxed text-ink-2">{p.body}</p>
+<!-- ─── How the marketplace works: one band, three plain statements ────────── -->
+<section class="mt-16 border-y border-line bg-surface-2">
+	<div class="container-page grid gap-8 py-10 md:grid-cols-3 md:gap-0 md:py-12">
+		{#each promises as p, i (p.title)}
+			<div
+				class={cn(
+					'flex gap-4 md:px-8',
+					i === 0 && 'md:ps-0',
+					i === promises.length - 1 && 'md:pe-0',
+					i > 0 && 'md:border-s md:border-line'
+				)}
+			>
+				<p.icon class="mt-0.5 size-6 shrink-0 text-primary" aria-hidden="true" />
+				<div class="flex flex-col gap-1.5">
+					<h3 class="text-base font-semibold text-ink">{p.title}</h3>
+					<p class="text-sm leading-relaxed text-ink-2">{p.body}</p>
+				</div>
 			</div>
 		{/each}
 	</div>
 </section>
 
 {#if home.popular_services.length}
-	<section class="container-page mt-20" aria-labelledby="popular-services">
+	<section class="container-page mt-16" aria-labelledby="popular-services">
 		{@render sectionHead(m().home.popularServices, '/services', 'popular-services')}
-		<div class="grid gap-3 md:grid-cols-2">
+		<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 			{#each home.popular_services.slice(0, 6) as service (service.id)}
 				<ServiceCard {service} />
 			{/each}
@@ -290,11 +277,11 @@
 	</section>
 {/if}
 
-{#if home.recent_stores.length}
-	<section class="container-page mt-20" aria-labelledby="recent-stores">
+{#if newStores.length}
+	<section class="container-page mt-16" aria-labelledby="recent-stores">
 		{@render sectionHead(m().home.recentStores, '/stores?sort=newest', 'recent-stores')}
-		<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-			{#each home.recent_stores.slice(0, 3) as store (store.id)}
+		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			{#each newStores as store (store.id)}
 				<StoreCard {store} />
 			{/each}
 		</div>
@@ -302,23 +289,32 @@
 {/if}
 
 {#if s.testimonials?.length}
-	<section class="container-page mt-20" aria-labelledby="testimonials">
+	<section class="container-page mt-16" aria-labelledby="testimonials">
 		{@render sectionHead(m().home.testimonials, undefined, 'testimonials')}
-		<div class="grid gap-3 md:grid-cols-3">
+		<div class="grid gap-x-10 gap-y-8 md:grid-cols-3">
 			{#each s.testimonials as t, i (i)}
-				<Card.Root>
-					<figure class="contents">
-						<Card.Content class="flex-1">
-							<blockquote class="text-lg leading-relaxed tracking-[-0.02em] text-ink">
-								“<bdi>{pick(t, 'quote')}</bdi>”
-							</blockquote>
-						</Card.Content>
-						<Card.Content>
-							<figcaption class="type-label text-ink-3"><bdi>{t.name}</bdi></figcaption>
-						</Card.Content>
-					</figure>
-				</Card.Root>
+				<figure class="flex flex-col gap-3 border-t-2 border-primary pt-5">
+					<blockquote class="text-lg leading-relaxed text-ink">
+						“<bdi>{pick(t, 'quote')}</bdi>”
+					</blockquote>
+					<figcaption class="text-sm text-ink-3"><bdi>{t.name}</bdi></figcaption>
+				</figure>
 			{/each}
 		</div>
 	</section>
 {/if}
+
+<!-- ─── Close: the invitation to merchants ─────────────────────────────────── -->
+<section class="container-page mt-16">
+	<div
+		class="flex flex-col items-start justify-between gap-6 rounded-2xl bg-brand-soft p-6 sm:p-10 md:flex-row md:items-center"
+	>
+		<div class="flex max-w-2xl flex-col gap-2">
+			<h2 class="type-headline text-ink">{m().nav.sell}</h2>
+			<p class="text-pretty text-ink-2">{m().footer.about}</p>
+		</div>
+		<Button href="/sell" size="lg" class="shrink-0">
+			<StoreIcon data-icon="inline-start" />{m().home.heroSecondary}
+		</Button>
+	</div>
+</section>

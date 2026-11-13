@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Shopfront Signboards</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:#101216;color:#fbfaf5;font-family:"Helvetica Neue",Arial,sans-serif}
+.nav{height:60px;display:flex;align-items:center;gap:36px;padding:0 44px;font-size:15px}
+.nav b{font-size:22px;font-weight:800;margin-right:auto}
+.street{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:0 44px;height:500px}
+.shop{display:flex;flex-direction:column}
+.sign{height:150px;padding:18px 22px;display:flex;flex-direction:column;justify-content:center;box-shadow:0 0 60px -10px var(--glow)}
+.sign h2{font-size:44px;line-height:1;font-weight:900;letter-spacing:-.03em;color:#fbfaf5}
+.sign span{font-size:15px;font-weight:700;letter-spacing:.08em;margin-top:8px;color:#fbfaf5}
+.g{background:#0b8f5a;--glow:#0b8f5a}.r{background:#c92f23;--glow:#e23b2e}.y{background:#ffc21a;--glow:#ffc21a}.bl{background:#1957d2;--glow:#1957d2}
+.y h2,.y span{color:#101216}
+.win{flex:1;margin-top:10px;background:linear-gradient(180deg,#fff3d6,#e9c98f);display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.win i{background:#fbfaf5;border-radius:2px}
+.kerb{height:10px;background:#2a2d33;margin:22px 0 0}
+.dir{margin:26px 44px 0;display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:end}
+.dir h1{font-size:72px;line-height:.95;font-weight:900;letter-spacing:-.04em}
+.board{background:#fbfaf5;color:#101216;height:76px;display:flex;align-items:center;padding-left:26px;font-size:20px}
+.board em{margin-left:auto;height:100%;width:140px;background:#ffc21a;display:grid;place-items:center;font-style:normal;font-weight:800}
+.dir p{font-size:17px;color:#c9c8c2;margin-bottom:14px}
+</style>
+</head>
+<body>
+<div class="nav"><b>Souq Collective</b><span>Stores</span><span>Products</span><span>Services</span><span>Sell</span><span>EN / ع</span><span>Cart 2</span></div>
+<div class="street">
+  <div class="shop"><div class="sign g"><h2>Najd Oud</h2><span>RIYADH · PERFUME</span></div><div class="win"><i></i><i></i></div></div>
+  <div class="shop"><div class="sign r"><h2>Dar Al Abaya</h2><span>JEDDAH · FASHION</span></div><div class="win"><i></i><i></i></div></div>
+  <div class="shop"><div class="sign y"><h2>Qassim Dates</h2><span>BURAYDAH · FOOD</span></div><div class="win"><i></i><i></i></div></div>
+  <div class="shop"><div class="sign bl"><h2>Hijaz Tailor</h2><span>MAKKAH · SERVICES</span></div><div class="win"><i></i><i></i></div></div>
+</div>
+<div class="kerb"></div>
+<div class="dir">
+  <h1>Every store on one street.</h1>
+  <div><p>Find a store, a product or a service.</p><div class="board">Search oud, abayas, dates, tailoring<em>Search</em></div></div>
+</div>
+</body>
+</html>

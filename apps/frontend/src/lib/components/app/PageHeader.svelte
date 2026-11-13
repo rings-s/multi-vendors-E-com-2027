@@ -31,7 +31,7 @@
 		<h1
 			class={cn(
 				'font-display text-ink',
-				size === 'lg' ? 'type-headline sm:text-[3.25rem]' : 'type-headline'
+				size === 'lg' ? 'type-headline sm:text-[2.5rem]' : 'type-headline'
 			)}
 		>
 			<bdi>{title}</bdi>

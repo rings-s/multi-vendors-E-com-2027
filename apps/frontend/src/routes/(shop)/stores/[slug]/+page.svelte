@@ -99,7 +99,7 @@
 		<div class="relative z-10 flex flex-col gap-6 pb-8 sm:flex-row sm:items-end sm:justify-between">
 			<div class="flex items-end gap-5">
 				<div
-					class="ms-4 -mt-12 size-24 shrink-0 overflow-hidden rounded-[24px] border-4 border-background bg-surface shadow-lift sm:ms-6 sm:-mt-14 sm:size-28"
+					class="ms-4 -mt-12 size-24 shrink-0 overflow-hidden rounded-2xl border-4 border-background bg-surface shadow-lift sm:ms-6 sm:-mt-14 sm:size-28"
 				>
 					<Picture
 						src={store.logo_url}

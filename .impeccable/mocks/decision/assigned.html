@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Qatt Bands</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:#f4f2ec;color:#141414;font-family:"Helvetica Neue",Arial,sans-serif}
+.nav{height:64px;display:flex;align-items:center;gap:40px;padding:0 48px;border-bottom:4px solid #141414;font-size:15px}
+.nav b{font-size:24px;font-weight:900;letter-spacing:-.03em;margin-right:auto}
+.nav .t{display:flex;border:2px solid #141414}
+.nav .t span{padding:6px 14px;font-size:13px;font-weight:700}
+.nav .t span.on{background:#141414;color:#f4f2ec}
+.field{height:404px;background:#0f6b4a;color:#f4f2ec;padding:44px 48px 0;position:relative}
+.field h1{font-size:118px;line-height:.9;font-weight:900;letter-spacing:-.05em;max-width:900px}
+.field p{font-size:18px;margin-top:20px;max-width:440px;opacity:.9}
+.search{position:absolute;left:48px;right:520px;bottom:36px;height:68px;background:#f4f2ec;color:#141414;display:flex;align-items:center;padding-left:24px;font-size:20px;border:3px solid #141414}
+.search i{margin-left:auto;width:132px;height:100%;background:#f2b705;border-left:3px solid #141414;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:17px}
+.photo{position:absolute;right:48px;top:36px;width:420px;height:468px;background:linear-gradient(160deg,#c9a47a,#7a4a2c 60%,#3c2114);border:3px solid #141414;z-index:2}
+.photo span{position:absolute;left:0;bottom:0;background:#f4f2ec;color:#141414;padding:10px 14px;font-size:14px;font-weight:700;border-top:3px solid #141414;border-right:3px solid #141414}
+.frieze{height:92px;display:grid;grid-template-columns:repeat(8,1fr);border-top:4px solid #141414;border-bottom:4px solid #141414;background:#f4f2ec}
+.frieze div{border-right:2px solid #141414;display:flex;align-items:center;gap:12px;padding:0 18px;font-size:15px;font-weight:700}
+.frieze div.on{background:#141414;color:#f4f2ec}
+.frieze svg{width:34px;height:34px;flex:none}
+.stores{height:336px;display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr}
+.stores section{padding:26px 28px;border-right:3px solid #141414;position:relative}
+.stores h2{font-size:40px;line-height:.95;font-weight:900;letter-spacing:-.04em}
+.stores small{display:block;font-size:14px;margin-top:8px;font-weight:600}
+.stores .p{position:absolute;left:28px;right:28px;bottom:26px;height:150px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stores .p i{border:2px solid #141414;background:#f4f2ec}
+.a{background:#f2b705}.b{background:#d8322a;color:#f4f2ec}.c{background:#1f4fbf;color:#f4f2ec}.d{background:#f4f2ec}
+</style>
+</head>
+<body>
+<div class="nav"><b>Souq Collective</b><span>Stores</span><span>Products</span><span>Services</span><span>Sell</span><div class="t"><span class="on">EN</span><span>ع</span></div><span>Cart 2</span></div>
+<div class="field">
+  <h1>Independent Saudi stores.</h1>
+  <p>One marketplace, one checkout, every store paid directly.</p>
+  <div class="search">Search oud, abayas, dates, tailoring<i>Search</i></div>
+  <div class="photo"><span>Najd Oud · SAR 240.00</span></div>
+</div>
+<div class="frieze">
+  <div class="on"><svg viewBox="0 0 34 34"><path d="M2 30 17 4l15 26z" fill="#f2b705"/></svg>All</div>
+  <div><svg viewBox="0 0 34 34"><path d="M17 2 32 17 17 32 2 17z" fill="#d8322a"/></svg>Perfume</div>
+  <div><svg viewBox="0 0 34 34"><path d="M2 2h30v30H2z" fill="#1f4fbf"/><path d="M17 8l9 9-9 9-9-9z" fill="#f4f2ec"/></svg>Fashion</div>
+  <div><svg viewBox="0 0 34 34"><path d="M2 30 10 8l7 22 7-22 8 22z" fill="#0f6b4a"/></svg>Food</div>
+  <div><svg viewBox="0 0 34 34"><path d="M2 4h30v8H2zM2 22h30v8H2z" fill="#d8322a"/></svg>Home</div>
+  <div><svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="14" fill="#f2b705"/></svg>Beauty</div>
+  <div><svg viewBox="0 0 34 34"><path d="M2 2h14v14H2zM18 18h14v14H18z" fill="#1f4fbf"/></svg>Crafts</div>
+  <div><svg viewBox="0 0 34 34"><path d="M2 17 17 2l15 15z" fill="#0f6b4a"/><path d="M2 32 17 19l15 13z" fill="#0f6b4a"/></svg>Services</div>
+</div>
+<div class="stores">
+  <section class="a"><h2>Najd Oud</h2><small>Riyadh · 48 products</small><div class="p"><i></i><i></i></div></section>
+  <section class="b"><h2>Dar Al Abaya</h2><small>Jeddah · 112 products</small><div class="p"><i></i><i></i></div></section>
+  <section class="c"><h2>Qassim Dates</h2><small>Buraydah · 31 products</small><div class="p"><i></i><i></i></div></section>
+  <section class="d"><h2>All stores</h2><small>Browse every merchant</small><div class="p"><i></i><i></i></div></section>
+</div>
+</body>
+</html>

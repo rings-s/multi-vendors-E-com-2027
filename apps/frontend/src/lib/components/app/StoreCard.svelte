@@ -1,7 +1,6 @@
 <script lang="ts">
 	import MapPinIcon from '@lucide/svelte/icons/map-pin';
 	import type { Store } from '#lib/api/types.js';
-	import { Badge } from '#lib/components/ui/badge/index.js';
 	import { fmt, m } from '#lib/i18n/state.svelte.js';
 	import Picture from './Picture.svelte';
 	import RatingStars from './RatingStars.svelte';
@@ -9,49 +8,45 @@
 	let { store }: { store: Store } = $props();
 </script>
 
-<!--
-	Brand spotlight: the cover image is the card. The store name sits in white display type
-	over a dark scrim; the logo floats as a white tile. No chrome beyond the 28px radius.
--->
+<!-- A store is a business, not a listing: cover, its own logo, name, place and rating. -->
 <a
 	href="/stores/{store.slug}"
-	class="group flex h-full flex-col rounded-2xl bg-card p-2 text-card-foreground shadow-soft ring-1 ring-edge transition-[box-shadow,translate] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-lift focus-visible:ring-4 focus-visible:ring-ring/25 focus-visible:outline-none"
+	class="group flex h-full flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-edge transition-shadow duration-200 outline-none hover:shadow-lift focus-visible:ring-2 focus-visible:ring-ring"
 	data-testid="store-card"
 >
-	<div class="relative aspect-[4/3] overflow-hidden rounded-[20px] bg-surface-3">
+	<div class="relative aspect-[5/2] overflow-hidden bg-surface-3">
 		<Picture
 			src={store.cover_url}
 			alt=""
 			fallback={store.name}
-			class="transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+			class="transition-transform duration-500 ease-(--ease-out) group-hover:scale-[1.04] [&>span]:hidden"
 		/>
-		<div
-			class="pointer-events-none absolute inset-0 bg-gradient-to-t from-scrim/70 via-scrim/10 to-transparent"
-			aria-hidden="true"
-		></div>
 		{#if !store.is_open}
-			<Badge variant="outline" class="absolute end-2.5 top-2.5 shadow-pill">
+			<span
+				class="absolute end-2 top-2 rounded-md bg-card/95 px-2 py-1 text-xs font-medium text-ink shadow-pill"
+			>
 				{m().stores.closedNow}
-			</Badge>
+			</span>
 		{/if}
-		<div class="absolute inset-x-0 bottom-0 flex items-end gap-3 p-4 text-on-scrim">
+	</div>
+	<div class="flex flex-1 flex-col gap-3 p-4 pt-0">
+		<div class="flex items-end gap-3">
 			<div
-				class="size-12 shrink-0 overflow-hidden rounded-[14px] bg-card shadow-soft ring-2 ring-on-scrim/90"
+				class="relative -mt-7 size-14 shrink-0 overflow-hidden rounded-xl bg-card shadow-soft ring-4 ring-card"
 			>
 				<Picture src={store.logo_url} alt="" fallback={store.name} />
 			</div>
-			<div class="flex min-w-0 flex-col gap-0.5">
-				<h3 class="truncate font-display text-xl leading-tight"><bdi>{store.name}</bdi></h3>
-				<span class="inline-flex items-center gap-1 type-label text-on-scrim/85">
-					<MapPinIcon class="size-3.5" aria-hidden="true" />{store.city || fmt.region(store.region)}
+			<div class="flex min-w-0 flex-1 flex-col pt-3">
+				<h3 class="truncate text-base font-semibold text-ink"><bdi>{store.name}</bdi></h3>
+				<span class="inline-flex items-center gap-1 text-[0.8125rem] text-ink-3">
+					<MapPinIcon class="size-3.5 shrink-0" aria-hidden="true" />
+					<span class="truncate">{store.city || fmt.region(store.region)}</span>
 				</span>
 			</div>
 		</div>
-	</div>
-	<div class="flex flex-1 flex-col gap-1.5 px-2 pt-3 pb-2">
-		<RatingStars rating={store.rating_avg} count={store.rating_count} />
 		{#if store.description}
 			<p class="line-clamp-2 text-sm leading-relaxed text-ink-2"><bdi>{store.description}</bdi></p>
 		{/if}
+		<RatingStars rating={store.rating_avg} count={store.rating_count} class="mt-auto" />
 	</div>
 </a>

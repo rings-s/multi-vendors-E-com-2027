@@ -1,5 +1,4 @@
 <script lang="ts">
-	import * as NavigationMenu from '#lib/components/ui/navigation-menu/index.js';
 	import { page } from '$app/state';
 	import BellIcon from '@lucide/svelte/icons/bell';
 	import LayoutGridIcon from '@lucide/svelte/icons/layout-grid';
@@ -9,6 +8,7 @@
 	import PackageIcon from '@lucide/svelte/icons/package';
 	import UserIcon from '@lucide/svelte/icons/user';
 	import { isCustomer } from '#lib/auth.js';
+	import { trackIndicator } from '#lib/indicator.js';
 	import { m } from '#lib/i18n/state.svelte.js';
 	import type { LayoutProps } from './$types';
 
@@ -50,29 +50,29 @@
 			: page.url.pathname === href || page.url.pathname.startsWith(href + '/');
 </script>
 
-<div class="container-page grid gap-8 py-10 lg:grid-cols-[14rem_1fr] lg:gap-12">
-	<div class="flex min-w-0 flex-col gap-3 lg:sticky lg:top-24 lg:self-start">
-		<p class="hidden font-display text-xl text-ink lg:block">{m().account.title}</p>
-		<NavigationMenu.Root
-			viewport={false}
-			aria-label={m().account.title}
-			class="max-w-full justify-start overflow-x-auto pb-1 *:w-full lg:overflow-visible"
-		>
-			<NavigationMenu.List class="justify-start lg:flex-col lg:items-stretch">
+<div class="container-page grid gap-8 py-8 lg:grid-cols-[15rem_1fr] lg:gap-12 lg:py-12">
+	<div class="flex min-w-0 flex-col gap-3 lg:sticky lg:top-32 lg:self-start">
+		<p class="hidden px-3 text-lg font-semibold text-ink lg:block">{m().account.title}</p>
+		<nav aria-label={m().account.title} class="-mx-4 overflow-x-auto px-4 lg:mx-0 lg:px-0">
+			<!-- A scrolling row of tabs on phones, a side list on desktop; one marker follows the page. -->
+			<ul
+				data-indicator="pill"
+				class="flex w-max gap-0.5 rounded-lg bg-muted p-0.5 [--ind-radius:7px] lg:w-full lg:flex-col lg:bg-transparent lg:p-0 lg:[--ind-bg:var(--muted)] lg:[--ind-radius:10px] lg:[--ind-shadow:none]"
+				{@attach (node) => trackIndicator(node)}
+			>
 				{#each items as item (item.href)}
-					<NavigationMenu.Item>
-						<NavigationMenu.Link
+					<li>
+						<a
 							href={item.href}
-							active={active(item.href, item.exact)}
 							aria-current={active(item.href, item.exact) ? 'page' : undefined}
-							class="px-3 whitespace-nowrap"
+							class="flex h-9 items-center gap-2.5 rounded-[7px] px-3 text-sm whitespace-nowrap text-ink-2 transition-colors duration-150 outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-ring/60 aria-[current=page]:font-medium aria-[current=page]:text-ink lg:h-10 lg:rounded-lg"
 						>
-							<item.icon aria-hidden="true" />{item.label}
-						</NavigationMenu.Link>
-					</NavigationMenu.Item>
+							<item.icon class="size-4 shrink-0" aria-hidden="true" />{item.label}
+						</a>
+					</li>
 				{/each}
-			</NavigationMenu.List>
-		</NavigationMenu.Root>
+			</ul>
+		</nav>
 	</div>
 	<div class="min-w-0">{@render children()}</div>
 </div>

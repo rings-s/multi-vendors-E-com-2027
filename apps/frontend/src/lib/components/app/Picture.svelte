@@ -31,12 +31,12 @@
 {:else}
 	<div
 		class={cn('[container-type:size] grid size-full place-items-center', className)}
-		style="background: color-mix(in oklab, oklch(78% 0.025 {hue}) 18%, var(--surface-2));"
+		style="background: color-mix(in oklab, oklch(72% 0.09 {hue}) 16%, var(--surface-2)); color: color-mix(in oklab, oklch(55% 0.1 {hue}) 55%, var(--muted-foreground));"
 		role="img"
 		aria-label={alt}
 	>
 		<span
-			class="font-display text-[min(32cqmin,3rem)] leading-none text-ink/25 uppercase"
+			class="text-[min(26cqmin,2.5rem)] leading-none font-semibold tracking-[-0.02em] uppercase opacity-60"
 			aria-hidden="true"
 		>
 			{initials(fallback ?? alt)}

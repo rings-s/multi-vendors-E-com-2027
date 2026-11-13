@@ -2,46 +2,64 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import BellIcon from '@lucide/svelte/icons/bell';
-	import LanguagesIcon from '@lucide/svelte/icons/languages';
 	import LayoutDashboardIcon from '@lucide/svelte/icons/layout-dashboard';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
 	import MenuIcon from '@lucide/svelte/icons/menu';
-	import MonitorIcon from '@lucide/svelte/icons/monitor';
-	import MoonIcon from '@lucide/svelte/icons/moon';
 	import PackageIcon from '@lucide/svelte/icons/package';
 	import ShieldIcon from '@lucide/svelte/icons/shield';
 	import ShoppingBagIcon from '@lucide/svelte/icons/shopping-bag';
 	import StoreIcon from '@lucide/svelte/icons/store';
-	import SunIcon from '@lucide/svelte/icons/sun';
 	import UserIcon from '@lucide/svelte/icons/user';
 	import { api } from '#lib/api/client.js';
+	import type { Category } from '#lib/api/types.js';
 	import { isAdmin, isCustomer, isMerchant } from '#lib/auth.js';
 	import { cart } from '#lib/cart.svelte.js';
-	import { Badge } from '#lib/components/ui/badge/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
-	import * as NavigationMenu from '#lib/components/ui/navigation-menu/index.js';
 	import * as Sheet from '#lib/components/ui/sheet/index.js';
-	import { dir, fmt, locale, m } from '#lib/i18n/state.svelte.js';
-	import { setLocale, setTheme, type Theme } from '#lib/prefs.js';
+	import { trackIndicator } from '#lib/indicator.js';
+	import { dir, fmt, m, pick } from '#lib/i18n/state.svelte.js';
 	import { signOut } from '#lib/session.js';
+	import { cn } from '#lib/utils.js';
+	import PrefToggles from './PrefToggles.svelte';
 	import SearchPill from './SearchPill.svelte';
 	import Wordmark from './Wordmark.svelte';
 
 	const user = $derived(page.data.user);
-	const theme = $derived((page.data.theme ?? 'system') as Theme);
+	const categories = $derived((page.data.navCategories ?? []) as Category[]);
 	let menuOpen = $state(false);
 	let unread = $state(0);
 	let q = $state(page.url.searchParams.get('q') ?? '');
 
-	const nav = $derived([
-		{ href: '/stores', label: m().nav.stores },
-		{ href: '/products', label: m().nav.products },
-		{ href: '/services', label: m().nav.services }
-	]);
+	const path = $derived(page.url.pathname);
+	const category = $derived(page.url.searchParams.get('category'));
+	const under = (href: string) => path === href || path.startsWith(href + '/');
 
-	const active = (href: string) =>
-		page.url.pathname === href || page.url.pathname.startsWith(href + '/');
+	/** One tab row: the fixed sections, then every top-level category. Exactly one is current. */
+	const tabs = $derived([
+		{ key: 'home', href: '/', label: m().nav.home, current: path === '/' },
+		{ key: 'stores', href: '/stores', label: m().nav.stores, current: under('/stores') },
+		{
+			key: 'products',
+			href: '/products',
+			label: m().nav.products,
+			current: under('/products') && !category
+		},
+		{
+			key: 'services',
+			href: '/services',
+			label: m().nav.services,
+			current: under('/services') && !category
+		},
+		...categories.map((c) => ({
+			key: c.id,
+			href: `/${c.kind === 'SERVICE' ? 'services' : 'products'}?category=${c.slug}`,
+			label: pick(c, 'name'),
+			current: (path === '/products' || path === '/services') && category === c.slug,
+			category: true
+		}))
+	]);
+	const firstCategory = $derived(tabs.findIndex((t) => 'category' in t));
 
 	$effect(() => {
 		if (user && isCustomer(user)) void cart.refresh();
@@ -57,18 +75,25 @@
 			.catch(() => {});
 	});
 
-	const themes = $derived([
-		{ value: 'light' as Theme, label: m().common.themeLight, icon: SunIcon },
-		{ value: 'dark' as Theme, label: m().common.themeDark, icon: MoonIcon },
-		{ value: 'system' as Theme, label: m().common.themeSystem, icon: MonitorIcon }
-	]);
-	const ThemeIcon = $derived(themes.find((t) => t.value === theme)?.icon ?? MonitorIcon);
+	/** Keep the chosen tab in view when the row scrolls (phones, many categories). */
+	function revealCurrent(node: HTMLElement) {
+		$effect(() => {
+			void path;
+			void category;
+			const current = node.querySelector<HTMLElement>('[aria-current="page"]');
+			if (!current || node.scrollWidth <= node.clientWidth) return;
+			const a = node.getBoundingClientRect();
+			const b = current.getBoundingClientRect();
+			node.scrollBy({ left: b.left + b.width / 2 - (a.left + a.width / 2), behavior: 'smooth' });
+		});
+	}
 </script>
 
 <header
-	class="sticky top-0 z-40 border-b border-line/70 bg-background/90 backdrop-blur-xl supports-[backdrop-filter]:bg-background/75"
+	class="sticky top-0 z-40 border-b border-line bg-background lg:border-b-0"
+	style="view-transition-name: site-header"
 >
-	<div class="container-page flex h-16 items-center gap-2 lg:gap-5">
+	<div class="container-page flex h-16 items-center gap-2 lg:gap-6">
 		<Sheet.Root bind:open={menuOpen}>
 			<Sheet.Trigger>
 				{#snippet child({ props })}
@@ -76,120 +101,70 @@
 						{...props}
 						variant="ghost"
 						size="icon"
-						class="lg:hidden"
+						class="-ms-2 lg:hidden"
 						aria-label={m().common.openMenu}
 					>
 						<MenuIcon />
 					</Button>
 				{/snippet}
 			</Sheet.Trigger>
-			<Sheet.Content side={dir() === 'rtl' ? 'right' : 'left'} class="w-80 max-w-[85vw]">
-				<Sheet.Header>
+			<Sheet.Content side={dir() === 'rtl' ? 'right' : 'left'} class="w-80 max-w-[88vw] gap-0">
+				<Sheet.Header class="border-b border-line">
 					<Sheet.Title><Wordmark size="sm" /></Sheet.Title>
 					<Sheet.Description class="sr-only">{m().common.menu}</Sheet.Description>
 				</Sheet.Header>
-				<div class="flex flex-col gap-6 px-4 pb-6">
-					<SearchPill bind:value={q} onsearch={() => (menuOpen = false)} />
-					<NavigationMenu.Root
-						orientation="vertical"
-						viewport={false}
-						aria-label={m().ui.mainNav}
-						class="max-w-none flex-col items-stretch *:w-full"
-					>
-						<NavigationMenu.List class="flex-col items-stretch gap-0.5">
-							{#each [{ href: '/', label: m().nav.home }, ...nav] as item (item.href)}
-								<NavigationMenu.Item>
-									<NavigationMenu.Link
-										href={item.href}
-										active={item.href === '/' ? page.url.pathname === '/' : active(item.href)}
-										aria-current={(
-											item.href === '/' ? page.url.pathname === '/' : active(item.href)
-										)
-											? 'page'
-											: undefined}
-										onclick={() => (menuOpen = false)}
-										class="px-2 py-2.5 text-base"
-									>
-										{item.label}
-									</NavigationMenu.Link>
-								</NavigationMenu.Item>
-							{/each}
-						</NavigationMenu.List>
-					</NavigationMenu.Root>
-					{#if !user || !isMerchant(user)}
-						<Button href="/sell" variant="outline" onclick={() => (menuOpen = false)}
-							><StoreIcon data-icon="inline-start" />{m().nav.sell}</Button
+				<div class="flex flex-1 flex-col gap-6 overflow-y-auto p-4">
+					<nav aria-label={m().ui.mainNav}>
+						<ul
+							data-indicator="pill"
+							class="flex flex-col gap-0.5 [--ind-bg:var(--muted)] [--ind-shadow:none]"
+							{@attach (node) => trackIndicator(node)}
 						>
-					{/if}
+							{#each tabs as tab, i (tab.key)}
+								{#if i === firstCategory}
+									<li class="px-3 pt-4 pb-1 type-caption text-ink-3" aria-hidden="true">
+										{m().nav.categories}
+									</li>
+								{/if}
+								<li>
+									<a
+										href={tab.href}
+										aria-current={tab.current ? 'page' : undefined}
+										onclick={() => (menuOpen = false)}
+										class="flex h-11 items-center rounded-lg px-3 text-[0.9375rem] text-ink-2 transition-colors outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-ring/60 aria-[current=page]:font-medium aria-[current=page]:text-ink"
+									>
+										<bdi>{tab.label}</bdi>
+									</a>
+								</li>
+							{/each}
+						</ul>
+					</nav>
+					<div class="mt-auto flex flex-col gap-3">
+						<PrefToggles expanded testable={false} />
+						{#if !user || !isMerchant(user)}
+							<Button href="/sell" variant="outline" onclick={() => (menuOpen = false)}
+								><StoreIcon data-icon="inline-start" />{m().nav.sell}</Button
+							>
+						{/if}
+					</div>
 				</div>
 			</Sheet.Content>
 		</Sheet.Root>
 
 		<a
 			href="/"
-			class="flex shrink-0 items-center rounded-full px-1 py-1 focus-visible:ring-4 focus-visible:ring-ring/20 focus-visible:outline-none"
+			class="flex shrink-0 items-center rounded-md py-1 outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
 			aria-label={m().brand.name}
 		>
 			<Wordmark />
 		</a>
 
-		<NavigationMenu.Root
-			viewport={false}
-			aria-label={m().ui.mainNav}
-			class="hidden flex-none lg:flex"
-		>
-			<NavigationMenu.List>
-				{#each nav as item (item.href)}
-					<NavigationMenu.Item>
-						<NavigationMenu.Link
-							href={item.href}
-							active={active(item.href)}
-							aria-current={active(item.href) ? 'page' : undefined}
-							class={NavigationMenu.navigationMenuTriggerStyle()}
-						>
-							{item.label}
-						</NavigationMenu.Link>
-					</NavigationMenu.Item>
-				{/each}
-			</NavigationMenu.List>
-		</NavigationMenu.Root>
+		<SearchPill bind:value={q} class="mx-auto hidden max-w-2xl flex-1 md:block" />
 
-		<SearchPill bind:value={q} class="ms-auto hidden max-w-md flex-1 md:block" />
-
-		<div class="ms-auto flex items-center gap-1 md:ms-0">
-			<Button
-				variant="ghost"
-				size="sm"
-				class="hidden sm:inline-flex"
-				lang={locale() === 'ar' ? 'en' : 'ar'}
-				onclick={() => setLocale(locale() === 'ar' ? 'en' : 'ar', !!user)}
-				data-testid="locale-switch"
-			>
-				<LanguagesIcon data-icon="inline-start" />{m().common.switchLanguage}
-			</Button>
-
-			<DropdownMenu.Root>
-				<DropdownMenu.Trigger>
-					{#snippet child({ props })}
-						<Button {...props} variant="ghost" size="icon" aria-label={m().common.theme}>
-							<ThemeIcon />
-						</Button>
-					{/snippet}
-				</DropdownMenu.Trigger>
-				<DropdownMenu.Content align="end">
-					<DropdownMenu.RadioGroup value={theme} onValueChange={(v) => setTheme(v as Theme)}>
-						{#each themes as t (t.value)}
-							<DropdownMenu.RadioItem value={t.value}><t.icon />{t.label}</DropdownMenu.RadioItem>
-						{/each}
-					</DropdownMenu.RadioGroup>
-					<DropdownMenu.Separator class="sm:hidden" />
-					<DropdownMenu.Group class="sm:hidden">
-						<DropdownMenu.Item onclick={() => setLocale(locale() === 'ar' ? 'en' : 'ar', !!user)}>
-							<LanguagesIcon />{m().common.switchLanguage}
-						</DropdownMenu.Item>
-					</DropdownMenu.Group>
-				</DropdownMenu.Content>
-			</DropdownMenu.Root>
+		<div class="ms-auto flex items-center gap-1 md:ms-0 lg:gap-2">
+			<div class="hidden items-center gap-2 lg:flex">
+				<PrefToggles />
+			</div>
 
 			{#if user}
 				<Button
@@ -201,34 +176,10 @@
 				>
 					<BellIcon />
 					{#if unread}
-						<span class="absolute end-1 top-1 size-2 rounded-full bg-primary ring-2 ring-background"
+						<span class="absolute end-2 top-2 size-2 rounded-full bg-sale ring-2 ring-background"
 						></span>
 					{/if}
 				</Button>
-			{/if}
-
-			{#if !user || isCustomer(user)}
-				<Button
-					href="/cart"
-					variant="ghost"
-					size="icon"
-					class="relative"
-					aria-label={m().ui.cartWithCount({ n: cart.count })}
-					data-testid="cart-link"
-				>
-					<ShoppingBagIcon data-icon="inline-start" />
-					{#if cart.count > 0}
-						<Badge
-							class="absolute -end-0.5 -top-0.5 h-5 min-w-5 px-1.5 tabular ring-2 ring-background"
-							data-testid="cart-count"
-						>
-							{fmt.number(cart.count)}
-						</Badge>
-					{/if}
-				</Button>
-			{/if}
-
-			{#if user}
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger>
 						{#snippet child({ props })}
@@ -283,14 +234,10 @@
 				<Button
 					href="/sign-in?next={encodeURIComponent(page.url.pathname + page.url.search)}"
 					variant="ghost"
-					size="sm"
 					class="hidden sm:inline-flex"
 				>
 					{m().nav.signIn}
 				</Button>
-				<Button href="/sell" variant="outline" size="sm" class="hidden xl:inline-flex"
-					><StoreIcon data-icon="inline-start" />{m().nav.sell}</Button
-				>
 				<Button
 					href="/sign-in"
 					variant="ghost"
@@ -301,6 +248,68 @@
 					<UserIcon />
 				</Button>
 			{/if}
+
+			{#if !user || isCustomer(user)}
+				<Button
+					href="/cart"
+					variant="outline"
+					class={cn('relative', cart.count > 0 ? 'gap-2 px-3' : 'w-10 px-0')}
+					aria-label={m().ui.cartWithCount({ n: cart.count })}
+					data-testid="cart-link"
+				>
+					<ShoppingBagIcon />
+					{#if cart.count > 0}
+						<span
+							class="grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground tabular"
+							data-testid="cart-count"
+						>
+							{fmt.number(cart.count)}
+						</span>
+					{/if}
+				</Button>
+			{/if}
 		</div>
 	</div>
+	<div class="container-page pb-3 md:hidden">
+		<SearchPill bind:value={q} />
+	</div>
 </header>
+
+<!-- Section and category tabs: one row, one sliding rule under the current tab. -->
+<nav
+	aria-label={m().ui.mainNav}
+	class="z-30 border-b border-line bg-background lg:sticky lg:top-16"
+	style="view-transition-name: site-tabs"
+>
+	<div class="container-page flex items-stretch gap-6">
+		<ul
+			data-indicator="line"
+			class="-mx-1 flex h-11 min-w-0 flex-1 [scrollbar-width:none] items-stretch gap-1 overflow-x-auto px-1 [--ind-bg:var(--primary)] [&::-webkit-scrollbar]:hidden"
+			{@attach (node) => trackIndicator(node)}
+			{@attach revealCurrent}
+		>
+			{#each tabs as tab, i (tab.key)}
+				{#if i === firstCategory}
+					<li class="my-3 w-px shrink-0 bg-line-strong" aria-hidden="true"></li>
+				{/if}
+				<li class="flex shrink-0">
+					<a
+						href={tab.href}
+						aria-current={tab.current ? 'page' : undefined}
+						class="flex items-center px-2.5 text-sm whitespace-nowrap text-ink-2 transition-colors duration-150 outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset aria-[current=page]:font-medium aria-[current=page]:text-ink"
+					>
+						<bdi>{tab.label}</bdi>
+					</a>
+				</li>
+			{/each}
+		</ul>
+		{#if !user || !isMerchant(user)}
+			<a
+				href="/sell"
+				class="hidden shrink-0 items-center gap-1.5 text-sm font-medium text-primary outline-none hover:underline hover:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring/60 lg:flex"
+			>
+				<StoreIcon class="size-4" aria-hidden="true" />{m().nav.sell}
+			</a>
+		{/if}
+	</div>
+</nav>

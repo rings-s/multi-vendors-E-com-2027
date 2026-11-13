@@ -1,7 +1,6 @@
 <script lang="ts">
 	import ClockIcon from '@lucide/svelte/icons/clock';
 	import type { Service } from '#lib/api/types.js';
-	import * as Card from '#lib/components/ui/card/index.js';
 	import { m, statusLabel } from '#lib/i18n/state.svelte.js';
 	import Picture from './Picture.svelte';
 	import PriceTag from './PriceTag.svelte';
@@ -12,32 +11,32 @@
 
 <a
 	href="/services/{service.id}"
-	class="group block rounded-2xl focus-visible:ring-4 focus-visible:ring-ring/25 focus-visible:outline-none"
+	class="group flex h-full gap-4 rounded-2xl bg-card p-3 ring-1 ring-edge transition-shadow duration-200 outline-none hover:shadow-lift focus-visible:ring-2 focus-visible:ring-ring"
 	data-testid="service-card"
 >
-	<Card.Root
-		size="sm"
-		class="h-full flex-row gap-4 p-2 transition-[box-shadow,translate] duration-300 ease-out group-hover:-translate-y-0.5 group-hover:shadow-lift"
-	>
-		<div class="size-24 shrink-0 overflow-hidden rounded-[20px] bg-surface-2 sm:size-28">
-			<Picture src={image?.url} alt={image?.alt || service.title} fallback={service.title} />
+	<div class="size-24 shrink-0 overflow-hidden rounded-xl bg-surface-2 sm:size-28">
+		<Picture
+			src={image?.url}
+			alt={image?.alt || service.title}
+			fallback={service.title}
+			class="transition-transform duration-500 ease-(--ease-out) group-hover:scale-[1.04]"
+		/>
+	</div>
+	<div class="flex min-w-0 flex-1 flex-col justify-between gap-2 py-1 pe-1">
+		<div class="flex flex-col gap-1">
+			{#if showStore}
+				<p class="truncate text-[0.8125rem] text-ink-3"><bdi>{service.store.name}</bdi></p>
+			{/if}
+			<h3 class="line-clamp-2 text-[0.9375rem] leading-snug font-medium text-ink">
+				<bdi>{service.title}</bdi>
+			</h3>
 		</div>
-		<div class="flex min-w-0 flex-1 flex-col justify-between gap-2 py-2 pe-2">
-			<div class="flex flex-col gap-1">
-				{#if showStore}
-					<p class="truncate type-label text-ink-3"><bdi>{service.store.name}</bdi></p>
-				{/if}
-				<Card.Title role="heading" aria-level={3} class="line-clamp-2">{service.title}</Card.Title>
-			</div>
-			<div class="flex flex-wrap items-center justify-between gap-2">
-				<PriceTag price={service.price} discounted={service.discounted_price} size="sm" />
-				<span class="inline-flex items-center gap-1 text-xs text-ink-3">
-					<ClockIcon class="size-3.5" aria-hidden="true" />
-					{m().common.minutes({ n: service.duration_minutes })} · {statusLabel(
-						service.location_type
-					)}
-				</span>
-			</div>
+		<div class="flex flex-wrap items-center justify-between gap-2">
+			<PriceTag price={service.price} discounted={service.discounted_price} size="sm" />
+			<span class="inline-flex items-center gap-1 text-xs text-ink-3">
+				<ClockIcon class="size-3.5" aria-hidden="true" />
+				{m().common.minutes({ n: service.duration_minutes })} · {statusLabel(service.location_type)}
+			</span>
 		</div>
-	</Card.Root>
+	</div>
 </a>

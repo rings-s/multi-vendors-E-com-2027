@@ -38,7 +38,7 @@
 	onValueChange={select}
 >
 	{#each options as o (o.value)}
-		<ToggleGroup.Item value={o.value} class="px-3 data-[state=on]:border-primary">
+		<ToggleGroup.Item value={o.value} class="px-3">
 			{o.label}
 		</ToggleGroup.Item>
 	{/each}

@@ -4,7 +4,7 @@
 	import '@fontsource/ibm-plex-sans-arabic/500.css';
 	import '@fontsource/ibm-plex-sans-arabic/600.css';
 	import '@fontsource-variable/inter/opsz.css';
-	import { goto } from '$app/navigation';
+	import { goto, onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -38,6 +38,20 @@
 		void import('virtual:pwa-register').then(({ registerSW }) =>
 			registerSW({ immediate: true, onNeedReload: () => {} })
 		);
+	});
+
+	// Page changes cross-fade (and a product image travels from card to page). Query-only
+	// changes such as filters and pagination stay instant.
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+		if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		if (navigation.from?.url.pathname === navigation.to?.url.pathname) return;
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
 	});
 
 	setSessionExpiredHandler(() => {

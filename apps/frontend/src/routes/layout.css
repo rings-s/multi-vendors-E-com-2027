@@ -16,52 +16,55 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Design tokens — see .claude/design.md.
-   White canvas, achromatic UI, ONE saturated accent (violet). Product imagery
-   supplies the colour; the interface stays black, white and warm-neutral grey.
+   Design tokens — see DESIGN.md.
+   A familiar marketplace, finished carefully: white ground, green-tinted neutrals,
+   one emerald brand colour for actions and selection, one warm red for discounts.
    shadcn-svelte token names are the source of truth; the marketplace aliases
    (ink, surface, line, brand…) map onto them so both vocabularies stay in sync.
    --------------------------------------------------------------------------- */
 :root {
-	--radius: 1.25rem;
+	--radius: 0.625rem;
 
-	/* Surfaces: level 0 canvas mist, level 1 pure white. */
 	--background: #ffffff;
-	--foreground: #000000;
+	--foreground: #101614;
 	--card: #ffffff;
-	--card-foreground: #000000;
+	--card-foreground: #101614;
 	--popover: #ffffff;
-	--popover-foreground: #000000;
+	--popover-foreground: #101614;
 
-	/* The single accent: wordmark, search submit, primary action. */
-	--primary: #5433eb;
-	--primary-active: #4424d6;
+	/* Brand emerald: primary actions, selection, links that act. */
+	--primary: #0b7355;
+	--primary-active: #095f46;
 	--primary-foreground: #ffffff;
-	--violet-wash: #c0b5f3;
 
-	--secondary: #f2f4f5;
-	--secondary-foreground: #000000;
-	--muted: #f2f4f5;
-	/* Darkened from Muted Gray (#787574) so body copy keeps AA on the mist canvas. */
-	--muted-foreground: #63605f;
-	--accent: #f2f4f5;
-	--accent-foreground: #000000;
-	--destructive: #d1281b;
-	--border: #ebebeb;
-	--input: rgb(0 0 0 / 0.12);
-	--ring: #5433eb;
+	--secondary: #f1f4f2;
+	--secondary-foreground: #101614;
+	--muted: #f1f4f2;
+	--muted-foreground: #55605b;
+	--accent: #f1f4f2;
+	--accent-foreground: #101614;
+	--destructive: #c4291c;
+	--border: #e1e6e3;
+	--input: #cbd3cf;
+	--ring: #0b7355;
 
-	--surface-2: #f2f4f5;
-	--surface-3: #e8eaeb;
-	--ink-3: #787574;
-	--line-strong: #cccccc;
-	--brand-soft: #efecfd;
-	/* Card edge: invisible on light (shadow does the work), a hairline on dark. */
-	--edge: rgb(0 0 0 / 0.04);
-	/* Ratings are monochrome ink — no second accent. */
-	--rating: #000000;
+	--surface-2: #f6f8f7;
+	--surface-3: #e8ecea;
+	--ink-3: #68736e;
+	--line-strong: #c3cbc7;
+	--brand-soft: #e5f3ed;
+	/* Card edge: a hairline in both themes. */
+	--edge: #e1e6e3;
+	--rating: #e8a317;
+	/* Discounts only. */
+	--sale: #c4321f;
+	--sale-soft: #fdebe7;
+	/* The homepage banner field. */
+	--hero: #0c4634;
+	--hero-foreground: #ffffff;
+	--hero-muted: #bcd8cc;
 
-	/* Functional status tones (orders, payouts). Kept muted, used only in badges. */
+	/* Functional status tones (orders, payouts). Used only in badges and alerts. */
 	--success: #17714a;
 	--success-soft: #e7f4ec;
 	--warning: #9a5300;
@@ -70,17 +73,15 @@
 	--info-soft: #ebf0fb;
 	--danger-soft: #fdecea;
 
-	--chart-1: #5433eb;
-	--chart-2: #332f2d;
-	--chart-3: #acb0aa;
-	/* Categorical slots 2-4 (slot 1 is --chart-1), validated as an adjacent set against the card
-	   surface: CVD ΔE >= 9.1 light / 8.4 dark. 5 and 6 are under 3:1 on white, so every chart that
+	/* Charts: slot 1 is the brand; 5 and 6 are under 3:1 on white, so every chart that
 	   uses them also shows the values as text. */
-	--chart-4: #eb6834;
-	--chart-5: #1baf7a;
-	--chart-6: #eda100;
+	--chart-1: #0b7355;
+	--chart-2: #25302c;
+	--chart-3: #a7b1ac;
+	--chart-4: #e0662f;
+	--chart-5: #3f74d9;
+	--chart-6: #e3a008;
 
-	/* Sidebar rail: white surface, mist pill on the active item. */
 	--sidebar: var(--card);
 	--sidebar-foreground: var(--foreground);
 	--sidebar-primary: var(--primary);
@@ -90,112 +91,126 @@
 	--sidebar-border: var(--border);
 	--sidebar-ring: var(--ring);
 
-	/* Elevation — verbatim from the design reference. */
-	--shadow-pill: 0 2px 8px 0 rgb(0 0 0 / 0.06);
-	--shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-	--shadow-float: 0 4px 24px 0 rgb(0 0 0 / 0.12);
-	--shadow-lift: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 12px 32px -4px rgb(0 0 0 / 0.16);
-	--shadow-brand: 0 4px 24px 0 rgb(69 36 219 / 0.34);
+	/* Elevation: hairlines separate; shadows are for things that float. */
+	--shadow-pill: 0 1px 2px 0 rgb(16 22 20 / 0.06);
+	--shadow-soft: 0 1px 2px 0 rgb(16 22 20 / 0.05), 0 2px 6px -1px rgb(16 22 20 / 0.05);
+	--shadow-float: 0 4px 12px -2px rgb(16 22 20 / 0.08), 0 16px 40px -8px rgb(16 22 20 / 0.16);
+	--shadow-lift: 0 2px 4px 0 rgb(16 22 20 / 0.05), 0 14px 28px -8px rgb(16 22 20 / 0.16);
+	--shadow-brand: 0 4px 14px -4px rgb(11 115 85 / 0.45);
+
+	/* Motion: one curve, three speeds. */
+	--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+	--dur-fast: 140ms;
+	--dur: 240ms;
+	--dur-slow: 420ms;
 	color-scheme: light;
 }
 
-/* Dark theme — derived (the reference is light-only). Same single-accent logic. */
+/* Dark theme: same roles, the emerald lifts so it reads on near-black. */
 @media (prefers-color-scheme: dark) {
 	:root[data-theme='system'] {
-		--background: #0c0c0e;
-		--foreground: #f5f5f6;
-		--card: #17171a;
-		--card-foreground: #f5f5f6;
-		--popover: #1c1c20;
-		--popover-foreground: #f5f5f6;
-		--primary: #7a63ff;
-		--primary-active: #6a51fa;
-		--primary-foreground: #ffffff;
-		--violet-wash: #3a2f80;
-		--secondary: #222226;
-		--secondary-foreground: #f5f5f6;
-		--muted: #1f1f23;
-		--muted-foreground: #a9a6a5;
-		--accent: #26262b;
-		--accent-foreground: #f5f5f6;
-		--destructive: #ff6a5c;
-		--border: #2a2a2f;
-		--input: rgb(255 255 255 / 0.14);
-		--ring: #8b78ff;
-		--surface-2: #18181c;
-		--surface-3: #222226;
-		--ink-3: #8f8c8b;
-		--line-strong: #3d3d43;
-		--brand-soft: #221d40;
-		--edge: rgb(255 255 255 / 0.08);
-		--rating: #f5f5f6;
+		--background: #0b0e0d;
+		--foreground: #f1f4f2;
+		--card: #131716;
+		--card-foreground: #f1f4f2;
+		--popover: #181d1b;
+		--popover-foreground: #f1f4f2;
+		--primary: #34c392;
+		--primary-active: #2bb083;
+		--primary-foreground: #04150e;
+		--secondary: #1c2220;
+		--secondary-foreground: #f1f4f2;
+		--muted: #191e1c;
+		--muted-foreground: #a4afaa;
+		--accent: #202725;
+		--accent-foreground: #f1f4f2;
+		--destructive: #ff6b5e;
+		--border: #252c29;
+		--input: #343d39;
+		--ring: #34c392;
+		--surface-2: #101413;
+		--surface-3: #1f2523;
+		--ink-3: #87928d;
+		--line-strong: #3b4541;
+		--brand-soft: #10271e;
+		--edge: #252c29;
+		--rating: #f2b233;
+		--sale: #ff7a6b;
+		--sale-soft: #381713;
+		--hero: #0f2f24;
+		--hero-foreground: #f1f4f2;
+		--hero-muted: #a9c4b8;
 		--success: #5fd39a;
-		--success-soft: #13291e;
+		--success-soft: #12281d;
 		--warning: #f2b45c;
 		--warning-soft: #2c2111;
 		--info: #8fb0ff;
 		--info-soft: #18213a;
 		--danger-soft: #3a1714;
-		--chart-1: #8b78ff;
-		--chart-2: #d9d6d4;
-		--chart-3: #6d716b;
-		--chart-4: #d95926;
-		--chart-5: #199e70;
-		--chart-6: #c98500;
-		--shadow-pill: 0 2px 8px 0 rgb(0 0 0 / 0.4);
-		--shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
-		--shadow-float: 0 4px 24px 0 rgb(0 0 0 / 0.55);
-		--shadow-lift: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 12px 32px -4px rgb(0 0 0 / 0.6);
-		--shadow-brand: 0 4px 24px 0 rgb(122 99 255 / 0.35);
+		--chart-1: #34c392;
+		--chart-2: #d6dcd9;
+		--chart-3: #66716c;
+		--chart-4: #e0733f;
+		--chart-5: #6f9bf0;
+		--chart-6: #d99a1c;
+		--shadow-pill: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+		--shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 0.45), 0 2px 6px -1px rgb(0 0 0 / 0.4);
+		--shadow-float: 0 4px 12px -2px rgb(0 0 0 / 0.5), 0 16px 40px -8px rgb(0 0 0 / 0.6);
+		--shadow-lift: 0 2px 4px 0 rgb(0 0 0 / 0.4), 0 14px 28px -8px rgb(0 0 0 / 0.65);
+		--shadow-brand: 0 4px 14px -4px rgb(52 195 146 / 0.4);
 		color-scheme: dark;
 	}
 }
 :root[data-theme='dark'] {
-	--background: #0c0c0e;
-	--foreground: #f5f5f6;
-	--card: #17171a;
-	--card-foreground: #f5f5f6;
-	--popover: #1c1c20;
-	--popover-foreground: #f5f5f6;
-	--primary: #7a63ff;
-	--primary-active: #6a51fa;
-	--primary-foreground: #ffffff;
-	--violet-wash: #3a2f80;
-	--secondary: #222226;
-	--secondary-foreground: #f5f5f6;
-	--muted: #1f1f23;
-	--muted-foreground: #a9a6a5;
-	--accent: #26262b;
-	--accent-foreground: #f5f5f6;
-	--destructive: #ff6a5c;
-	--border: #2a2a2f;
-	--input: rgb(255 255 255 / 0.14);
-	--ring: #8b78ff;
-	--surface-2: #18181c;
-	--surface-3: #222226;
-	--ink-3: #8f8c8b;
-	--line-strong: #3d3d43;
-	--brand-soft: #221d40;
-	--edge: rgb(255 255 255 / 0.08);
-	--rating: #f5f5f6;
+	--background: #0b0e0d;
+	--foreground: #f1f4f2;
+	--card: #131716;
+	--card-foreground: #f1f4f2;
+	--popover: #181d1b;
+	--popover-foreground: #f1f4f2;
+	--primary: #34c392;
+	--primary-active: #2bb083;
+	--primary-foreground: #04150e;
+	--secondary: #1c2220;
+	--secondary-foreground: #f1f4f2;
+	--muted: #191e1c;
+	--muted-foreground: #a4afaa;
+	--accent: #202725;
+	--accent-foreground: #f1f4f2;
+	--destructive: #ff6b5e;
+	--border: #252c29;
+	--input: #343d39;
+	--ring: #34c392;
+	--surface-2: #101413;
+	--surface-3: #1f2523;
+	--ink-3: #87928d;
+	--line-strong: #3b4541;
+	--brand-soft: #10271e;
+	--edge: #252c29;
+	--rating: #f2b233;
+	--sale: #ff7a6b;
+	--sale-soft: #381713;
+	--hero: #0f2f24;
+	--hero-foreground: #f1f4f2;
+	--hero-muted: #a9c4b8;
 	--success: #5fd39a;
-	--success-soft: #13291e;
+	--success-soft: #12281d;
 	--warning: #f2b45c;
 	--warning-soft: #2c2111;
 	--info: #8fb0ff;
 	--info-soft: #18213a;
 	--danger-soft: #3a1714;
-	--chart-1: #8b78ff;
-	--chart-2: #d9d6d4;
-	--chart-3: #6d716b;
-	--chart-4: #d95926;
-	--chart-5: #199e70;
-	--chart-6: #c98500;
-	--shadow-pill: 0 2px 8px 0 rgb(0 0 0 / 0.4);
-	--shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
-	--shadow-float: 0 4px 24px 0 rgb(0 0 0 / 0.55);
-	--shadow-lift: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 12px 32px -4px rgb(0 0 0 / 0.6);
-	--shadow-brand: 0 4px 24px 0 rgb(122 99 255 / 0.35);
+	--chart-1: #34c392;
+	--chart-2: #d6dcd9;
+	--chart-3: #66716c;
+	--chart-4: #e0733f;
+	--chart-5: #6f9bf0;
+	--chart-6: #d99a1c;
+	--shadow-pill: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+	--shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 0.45), 0 2px 6px -1px rgb(0 0 0 / 0.4);
+	--shadow-float: 0 4px 12px -2px rgb(0 0 0 / 0.5), 0 16px 40px -8px rgb(0 0 0 / 0.6);
+	--shadow-lift: 0 2px 4px 0 rgb(0 0 0 / 0.4), 0 14px 28px -8px rgb(0 0 0 / 0.65);
+	--shadow-brand: 0 4px 14px -4px rgb(52 195 146 / 0.4);
 	color-scheme: dark;
 }
 
@@ -248,8 +263,12 @@
 	--color-brand: var(--primary);
 	--color-brand-ink: var(--primary-foreground);
 	--color-brand-soft: var(--brand-soft);
-	--color-violet-wash: var(--violet-wash);
 	--color-rating: var(--rating);
+	--color-sale: var(--sale);
+	--color-sale-soft: var(--sale-soft);
+	--color-hero: var(--hero);
+	--color-hero-foreground: var(--hero-foreground);
+	--color-hero-muted: var(--hero-muted);
 	--color-danger: var(--destructive);
 	--color-danger-soft: var(--danger-soft);
 	--color-success: var(--success);
@@ -262,23 +281,22 @@
 	--color-scrim: #000000;
 	--color-on-scrim: #ffffff;
 
-	/* One family at every size (GT Standard → Inter substitute). Arabic falls through to Plex. */
+	/* One family at every size. Arabic falls through to Plex Sans Arabic. */
 	--font-sans:
 		'Inter Variable', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, -apple-system,
 		BlinkMacSystemFont, 'Segoe UI', sans-serif;
 	--font-display: var(--font-sans);
 	--font-heading: var(--font-sans);
 
-	/* Radius scale pinned to the reference: 9999 pills, 28px cards, 20px pills/panels. */
-	--radius-sm: 8px;
-	--radius-md: 14px; /* menu items, tooltips, skeletons */
-	--radius-lg: 20px; /* popovers, menus, alerts, textareas */
-	--radius-xl: 28px; /* dialogs */
-	--radius-2xl: 28px; /* cards */
-	--radius-3xl: 32px;
-	--radius-4xl: 9999px; /* badges */
+	/* Radius scale: 6 badges, 8 small controls, 10 controls, 12 media, 16 cards and panels. */
+	--radius-sm: 6px;
+	--radius-md: 8px;
+	--radius-lg: 10px;
+	--radius-xl: 12px;
+	--radius-2xl: 16px;
+	--radius-3xl: 20px;
+	--radius-4xl: 6px; /* badges */
 
-	/* Elevation ladder — Tailwind's scale points at the reference shadows. */
 	--shadow-xs: 0 0 #0000;
 	--shadow-sm: var(--shadow-pill);
 	--shadow-md: var(--shadow-soft);
@@ -298,36 +316,64 @@
 	html {
 		-webkit-font-smoothing: antialiased;
 		text-rendering: optimizeLegibility;
+		scrollbar-color: var(--line-strong) transparent;
+		scrollbar-width: thin;
+		/* Anchored jumps clear the sticky header. */
+		scroll-padding-top: 7.5rem;
 	}
 	body {
 		@apply bg-background text-foreground;
 		font-family: var(--font-sans);
 		font-optical-sizing: auto;
-		/* Shape text with tracking, not weight. */
-		letter-spacing: -0.011em;
+		font-feature-settings: 'cv11', 'calt';
+		letter-spacing: -0.006em;
 		min-height: 100dvh;
+		caret-color: var(--primary);
+		accent-color: var(--primary);
 	}
 	h1,
 	h2,
 	h3 {
 		text-wrap: balance;
-		letter-spacing: -0.025em;
+		letter-spacing: -0.02em;
 	}
 	/* Arabic is cursive: negative tracking breaks joins. */
 	:root[lang='ar'] body,
-	:root[lang='ar'] :is(h1, h2, h3, .font-display) {
+	:root[lang='ar'] :is(h1, h2, h3, .font-display),
+	:root[lang='ar'] [class*='type-'] {
 		letter-spacing: 0;
 	}
+	/* Arabic sits higher on the line and needs more leading at display sizes. */
+	:root[lang='ar'] :is(.type-display, .type-headline) {
+		line-height: 1.3;
+	}
 	::selection {
-		background: color-mix(in oklab, var(--primary) 22%, transparent);
+		background: color-mix(in oklab, var(--primary) 24%, transparent);
+	}
+	a,
+	button,
+	[role='button'] {
+		-webkit-tap-highlight-color: transparent;
+	}
+	::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+	::-webkit-scrollbar-thumb {
+		background: var(--line-strong);
+		border: 3px solid transparent;
+		background-clip: content-box;
+		border-radius: 9999px;
+	}
+	::-webkit-scrollbar-track {
+		background: transparent;
 	}
 }
 
 @layer components {
-	/* Display headings: semibold, compressed — big text pulls tight. */
 	.font-display {
-		font-weight: 600;
-		letter-spacing: -0.04em;
+		font-weight: 650;
+		letter-spacing: -0.03em;
 	}
 	/* Directional icons (chevrons, arrows) mirror in RTL. */
 	[dir='rtl'] .cn-rtl-flip,
@@ -337,7 +383,7 @@
 	.cn-toast {
 		font-family: var(--font-sans);
 	}
-	/* Horizontal product rails: snap, no scrollbar chrome. */
+	/* Horizontal rails: snap, no scrollbar chrome. */
 	.rail {
 		display: grid;
 		grid-auto-flow: column;
@@ -353,48 +399,152 @@
 	.rail > * {
 		scroll-snap-align: start;
 	}
+
+	/* -----------------------------------------------------------------------
+	   Sliding selection indicator (see lib/indicator.ts).
+	   One motion shared by tabs, segmented toggles and navigation: the marker
+	   travels to the chosen item instead of blinking between two places.
+	   Markup sets data-indicator="pill" | "line"; the script adds the position.
+	   Until it has run, the chosen item paints its own marker (no-JS fallback).
+	   ----------------------------------------------------------------------- */
+	[data-indicator] {
+		position: relative;
+		isolation: isolate;
+	}
+	[data-indicator]::before {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		top: 0;
+		left: 0;
+		width: var(--ind-w, 0px);
+		height: var(--ind-h, 0px);
+		transform: translate3d(var(--ind-x, 0px), var(--ind-y, 0px), 0);
+		opacity: var(--ind-o, 0);
+		border-radius: var(--ind-radius, 8px);
+		background: var(--ind-bg, var(--card));
+		box-shadow: var(--ind-shadow, var(--shadow-soft), 0 0 0 1px var(--edge));
+		pointer-events: none;
+		transition:
+			transform var(--dur-slow) var(--ease-out),
+			width var(--dur-slow) var(--ease-out),
+			height var(--dur-slow) var(--ease-out),
+			opacity var(--dur-fast) linear;
+	}
+	[data-indicator='line']::before {
+		top: auto;
+		bottom: 0;
+		height: 2px;
+		transform: translate3d(var(--ind-x, 0px), 0, 0);
+		border-radius: 2px 2px 0 0;
+		background: var(--ind-bg, var(--foreground));
+		box-shadow: none;
+	}
+	[data-indicator][data-indicator-ready='instant']::before {
+		transition: none;
+	}
+	[data-indicator='pill']:not([data-indicator-ready])
+		:is(
+			[data-state='active'],
+			[data-state='on'],
+			[aria-current='page'],
+			[aria-checked='true'],
+			[data-active='true']
+		) {
+		background: var(--ind-bg, var(--card));
+		box-shadow: var(--ind-shadow, var(--shadow-soft), 0 0 0 1px var(--edge));
+	}
+	[data-indicator='line']:not([data-indicator-ready])
+		:is([data-state='active'], [aria-current='page'], [aria-checked='true']) {
+		box-shadow: inset 0 -2px 0 var(--ind-bg, var(--foreground));
+	}
+
+	/* Content that arrives: a short rise, staggered by --i. Visible by default without motion. */
+	.rise {
+		animation: rise var(--dur-slow) var(--ease-out) both;
+		animation-delay: calc(var(--i, 0) * 45ms);
+	}
+}
+
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+}
+
+/* Page changes cross-fade; a product image travels from its card to the product page. */
+@view-transition {
+	navigation: none;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 180ms;
+	animation-timing-function: var(--ease-out);
+}
+::view-transition-group(product-media) {
+	animation-duration: 380ms;
+	animation-timing-function: var(--ease-out);
+}
+::view-transition-old(product-media),
+::view-transition-new(product-media) {
+	height: 100%;
+	object-fit: cover;
+}
+::view-transition-group(site-header),
+::view-transition-group(site-tabs) {
+	animation: none;
+	z-index: 10;
+}
+::view-transition-old(site-header),
+::view-transition-old(site-tabs) {
+	display: none;
+}
+::view-transition-new(site-header),
+::view-transition-new(site-tabs) {
+	animation: none;
 }
 
 /* Type scale — utilities (not --text-* keys) so cn() never mistakes them for colours. */
 @utility type-display {
-	font-size: clamp(2.5rem, 4.2vw + 1rem, 4.75rem);
-	font-weight: 600;
-	line-height: 1.02;
-	letter-spacing: -0.045em;
+	font-size: clamp(2.125rem, 2.6vw + 1.25rem, 3.5rem);
+	font-weight: 650;
+	line-height: 1.05;
+	letter-spacing: -0.035em;
 }
 @utility type-headline {
-	font-size: clamp(1.75rem, 1.6vw + 1rem, 2.5rem);
-	font-weight: 600;
-	line-height: 1.08;
-	letter-spacing: -0.04em;
+	font-size: clamp(1.625rem, 1.1vw + 1.25rem, 2.125rem);
+	font-weight: 650;
+	line-height: 1.12;
+	letter-spacing: -0.03em;
 }
 @utility type-title {
 	font-size: 1.25rem;
 	font-weight: 600;
-	line-height: 1.2;
-	letter-spacing: -0.035em;
+	line-height: 1.25;
+	letter-spacing: -0.02em;
 }
 @utility type-label {
-	font-size: 0.75rem;
+	font-size: 0.8125rem;
 	font-weight: 500;
-	line-height: 1.33;
-	letter-spacing: -0.017em;
+	line-height: 1.35;
+	letter-spacing: -0.003em;
 }
 @utility type-caption {
-	font-size: 0.6875rem;
+	font-size: 0.75rem;
 	font-weight: 500;
-	line-height: 1.33;
-	letter-spacing: -0.01em;
+	line-height: 1.35;
+	letter-spacing: 0;
 }
 
 @utility tabular {
 	font-variant-numeric: tabular-nums;
 }
 
-/* 1200px content column (reference max-width) plus gutters. */
+/* 1280px content column plus gutters. */
 @utility container-page {
 	width: 100%;
-	max-width: calc(1200px + 4rem);
+	max-width: calc(1280px + 4rem);
 	margin-inline: auto;
 	padding-inline: 1rem;
 	@media (width >= 40rem) {
@@ -406,7 +556,7 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Leaflet maps (LocationMap.svelte): pill controls, violet pin, themed tiles.
+   Leaflet maps (LocationMap.svelte): rounded controls, brand pin, themed tiles.
    --------------------------------------------------------------------------- */
 .location-map.leaflet-container {
 	font-family: var(--font-sans);
@@ -418,7 +568,7 @@
 }
 .location-map .leaflet-bar {
 	border: 0;
-	border-radius: 9999px;
+	border-radius: 10px;
 	overflow: hidden;
 	box-shadow: var(--shadow-float);
 }
@@ -496,22 +646,17 @@
 	}
 }
 
-/* Hero constellation: a slow, barely-there hover. Disabled by reduced motion below. */
-@keyframes drift {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	50% {
-		transform: translateY(-8px);
-	}
-}
-
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
 	*::after {
 		animation-duration: 0.01ms !important;
+		animation-delay: 0ms !important;
 		transition-duration: 0.01ms !important;
+	}
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
 	}
 }

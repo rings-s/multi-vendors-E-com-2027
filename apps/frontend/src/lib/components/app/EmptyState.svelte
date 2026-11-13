@@ -14,7 +14,9 @@
 	let { title, description, icon: Icon, class: className, children }: Props = $props();
 </script>
 
-<Empty.Root class={cn('border-0 bg-surface-2 py-16', className)}>
+<Empty.Root
+	class={cn('rounded-2xl border border-dashed border-line-strong bg-surface-2 py-16', className)}
+>
 	<Empty.Header>
 		{#if Icon}
 			<Empty.Media variant="icon">

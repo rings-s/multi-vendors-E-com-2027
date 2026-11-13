@@ -66,7 +66,10 @@
 	</Card.Header>
 	<Card.Content class="flex flex-col gap-1">
 		<p
-			class={cn('text-2xl font-medium tracking-tight tabular', tone === 'danger' && 'text-danger')}
+			class={cn(
+				'text-[1.625rem] leading-tight font-semibold tracking-[-0.02em] tabular',
+				tone === 'danger' && 'text-danger'
+			)}
 		>
 			{value}
 		</p>

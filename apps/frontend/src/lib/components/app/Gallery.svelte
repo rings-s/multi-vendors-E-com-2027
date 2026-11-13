@@ -9,7 +9,11 @@
 </script>
 
 <div class="flex flex-col gap-3">
-	<div class="aspect-[4/5] overflow-hidden rounded-2xl bg-surface-2">
+	<div
+		class="aspect-square overflow-hidden rounded-2xl bg-surface-2 ring-1 ring-edge"
+		data-product-media
+		style="view-transition-name: product-media"
+	>
 		<Picture src={current?.url} alt={current?.alt || title} fallback={title} loading="eager" />
 	</div>
 	{#if images.length > 1}
@@ -25,7 +29,7 @@
 				<ToggleGroup.Item
 					value={String(i)}
 					aria-label="{title} {i + 1}"
-					class="aspect-square h-auto w-full overflow-hidden border-2 bg-surface-2 p-0 data-[state=on]:border-primary"
+					class="aspect-square h-auto w-full overflow-hidden rounded-lg border-2 border-transparent bg-surface-2 p-0 opacity-70 transition-[opacity,border-color] duration-150 hover:opacity-100 data-[state=on]:border-primary data-[state=on]:opacity-100"
 				>
 					<img src={img.url} alt="" class="size-full object-cover" />
 				</ToggleGroup.Item>

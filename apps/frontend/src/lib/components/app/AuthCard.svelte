@@ -12,13 +12,13 @@
 	let { title, subtitle, children, footer }: Props = $props();
 </script>
 
-<div class="container-page grid min-h-[calc(100dvh-4rem)] place-items-center py-12">
+<div class="container-page grid min-h-[calc(100dvh-4rem)] place-items-center py-12 sm:py-16">
 	<div class="flex w-full max-w-md flex-col gap-8">
 		<div class="flex flex-col gap-2 text-center">
 			<h1 class="font-display type-headline text-ink">{title}</h1>
 			{#if subtitle}<p class="text-ink-2">{subtitle}</p>{/if}
 		</div>
-		<Card.Root class="shadow-float">
+		<Card.Root class="shadow-soft">
 			<Card.Content>{@render children()}</Card.Content>
 		</Card.Root>
 		{#if footer}
